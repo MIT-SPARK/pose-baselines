@@ -15,4 +15,7 @@
 	url = https://github.com/dragonlong/equi-pose.git
 [submodule "SGP"]
 	path = SGP
-	url = https://github.com/theNded/SGP.git 
+	url = https://github.com/theNded/SGP.git
+[submodule "point-architectures"]
+	path = point-architectures
+	url = git@github.mit.edu:SPARK/point-architectures.git
