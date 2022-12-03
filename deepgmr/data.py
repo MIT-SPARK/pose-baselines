@@ -130,8 +130,10 @@ class TrainData(Dataset):
         self.get_rri = get_rri_cuda if torch.cuda.is_available() else get_rri
 
     def __getitem__(self, index):
+        # breakpoint()
         pcd1 = self.points[index][:self.n_points]
         pcd2 = self.points[index][:self.n_points]
+        # breakpoint()
         transform = random_pose(self.max_angle, self.max_trans / 2)
         pose1 = random_pose(np.pi, self.max_trans)
         pose2 = transform @ pose1

@@ -1,4 +1,4 @@
-name: deepgmr
+name: deepgmrv3
 channels:
   - pytorch
   - defaults
@@ -152,5 +152,4 @@ dependencies:
     - pyglet==1.5.0
     - pytools==2019.1.1
     - tensorboardx==1.9
-prefix: /home/wentaoy/anaconda3/envs/deepgmr
 

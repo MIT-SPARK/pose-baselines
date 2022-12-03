@@ -7,82 +7,109 @@ import argparse
 import numpy as np
 import os
 import torch
+import math
 from time import time
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+import pandas as pd
+from tensorboardX import SummaryWriter
 
 from data import TestData
 from model import DeepGMR
+from pytorch3d import ops
+
+from utils_common import analyze_registration_dataset, plot_cdf, EvalData
+from utils_common import rotation_error, translation_error, adds_error
+from utils_conversion import deepgmrDataToStandardFormat, ShapeNetDataset
+
+CERT_EPSILON: dict = {
+    'airplane': 0.999,
+    'bathtub': 0.998,
+    'bed': 0.998,
+    'bottle': 0.99,
+    'cap': 0.99,
+    'car': 0.999,
+    'chair': 0.999,
+    'guitar': 0.9995,
+    'helmet': 0.998,
+    'knife': 0.9995,
+    'laptop': 0.995,
+    'motorcycle': 0.999,
+    'mug': 0.995,
+    'skateboard': 0.999,
+    'table': 0.99,
+    'vessel': 0.999
+}
 
 
-def evaluate(model, loader, rmse_thresh, save_results=False, results_dir=None):
+def evaluate(model, loader, rmse_thresh, save_results=False, results_dir=None, writer=None):
     model.eval()
 
-    log_fmt = 'Test: inference time {:.3f}, preprocessing time {:.3f}, loss {:.4f}, ' + \
-              'rotation error {:.2f}, translation error {:.4f}, RMSE {:.4f}, Recall {:.3f}'
-    inference_time = 0
-    preprocess_time = 0
-    losses = 0
-    r_errs = 0
-    t_errs = 0
-    rmses = 0
-    n_correct = 0
-    N = 0
+    # note: not using rmse_thres, save_results (which we always do).
+    # inference_time = 0
+    # preprocess_time = 0
 
-    if save_results:
-        rotations = []
-        translations = []
-        rotations_gt = []
-        translations_gt = []
+    rotation_err = []
+    translation_err = []
+    adds_err = []
 
-    start = time()
+    # start = time()
     for step, (pts1, pts2, T_gt) in enumerate(tqdm(loader, leave=False)):
+        # breakpoint()
         if torch.cuda.is_available():
             pts1 = pts1.cuda()
             pts2 = pts2.cuda()
             T_gt = T_gt.cuda()
-        preprocess_time += time() - start
-        N += pts1.shape[0]
+        # preprocess_time += time() - start
 
-        start = time()
+        # start = time()
         with torch.no_grad():
             loss, r_err, t_err, rmse = model(pts1, pts2, T_gt)
-            inference_time += time() - start
+            # inference_time += time() - start
+            T_est = model.T_12
 
-        losses += loss.item()
-        r_errs += r_err.sum().item()
-        t_errs += t_err.sum().item()
-        rmses += rmse.sum().item()
-        n_correct += (rmse < rmse_thresh).sum().item()
+        r_err = r_err * math.pi / 180
 
-        if save_results:
-            rotations.append(model.T_12[:, :3, :3].cpu().numpy())
-            translations.append(model.T_12[:, :3, 3].cpu().numpy())
-            rotations_gt.append(T_gt[:, :3, :3].cpu().numpy())
-            translations_gt.append(T_gt[:, :3, 3].cpu().numpy())
+        R_gt = T_gt[:, :3, :3]
+        t_gt = T_gt[:, :3, 3:]
+        R_est = T_est[:, :3, :3]
+        t_est = T_est[:, :3, 3:]
 
-        start = time()
+        r_err_ = rotation_error(R_est, R_gt).squeeze(-1)
+        t_err_ = translation_error(t_est, t_gt).squeeze(-1)
+        adds_ = adds_error(pts1[:, :, :3].transpose(-1, -2), T_gt, T_est).squeeze(0)
 
-    log_str = log_fmt.format(
-        inference_time / N, preprocess_time / N, losses / len(loader),
-        r_errs / N, t_errs / N, rmses / N, n_correct / N
-    )
-    print(log_str)
+        r_err = [x.item() for x in r_err_]
+        t_err = [x.item() for x in t_err_]
+        adds = [x.item() for x in adds_]
 
-    if save_results:
-        os.makedirs(results_dir, exist_ok=True)
-        np.save(os.path.join(results_dir, 'rotations.npy'), np.concatenate(rotations, 0))
-        np.save(os.path.join(results_dir, 'translations.npy'), np.concatenate(translations, 0))
-        np.save(os.path.join(results_dir, 'rotations_gt.npy'), np.concatenate(rotations_gt, 0))
-        np.save(os.path.join(results_dir, 'translations_gt.npy'), np.concatenate(translations_gt, 0))
+        rotation_err = [*rotation_err, *r_err]
+        translation_err = [*translation_err, *t_err]
+        adds_err = [*adds_err, *adds]
+
+    # breakpoint()
+    if writer is not None:
+        # breakpoint()
+        writer.add_histogram('test/rotation_err', torch.tensor(rotation_err), bins=100)
+        writer.add_histogram('test/trans_err', torch.tensor(translation_err), bins=100)
+        writer.add_histogram('test/adds_err', torch.tensor(adds_err), bins=100)
+
+        data_ = EvalData()
+        data_.set_adds(np.array(adds_err))
+        data_.set_rerr(np.array(rotation_err))
+        data_.set_terr(np.array(translation_err))
+        savefile = results_dir + '/' + 'eval_data.pkl'
+        data_.save(savefile)
+
+    return None
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # general
-    parser.add_argument('--data_file')
-    parser.add_argument('--results_dir')
-    parser.add_argument('--checkpoint')
+    parser.add_argument('--data_file', type=str, default=' ')
+    parser.add_argument('--results_dir', type=str, default='./log')
+    parser.add_argument('--checkpoint', type=str, default='models/modelnet_noisy.pth')
     parser.add_argument('--save_results', action='store_true')
     parser.add_argument('--rmse_thresh', type=int, default=0.2)
     # dataset
@@ -94,14 +121,92 @@ if __name__ == "__main__":
     parser.add_argument('--use_rri', action='store_true')
     parser.add_argument('--use_tnet', action='store_true')
     parser.add_argument('--k', type=int, default=20)
+
+    # new for baseline
+    parser.add_argument('--type', type=str, default='deepgmr')
+    #       'deepgmr', 'shapenet.sim', 'shapenet.real', 'ycb.sim', 'ycb.real'
+    # shapenet specific
+    parser.add_argument('--analyze_data', type=bool, default=False)
+    parser.add_argument('--object', type=str, default='all')  # could be 'all' or any shapenet object class name
+    parser.add_argument('--shapenet_ds_len', type=int, default=512) # for shapenet objects' dataset
+    # c3po evaluation
+    # parser.add_argument('--eval_normalize', type=bool, default=True)
+    # parser.add_argument('--eval_adds_threshold', type=float, default=0.02)
+    # parser.add_argument('--eval_adds_auc_threshold', type=float, default=0.05)
+    # parser.add_argument('--cert_epsilon', type=float, default=None) # default using CERT_EPSILON
+    # data analysis
+
+    #
     args = parser.parse_args()
 
     model = DeepGMR(args)
     if torch.cuda.is_available():
         model.cuda()
 
-    test_data = TestData(args.data_file, args)
-    test_loader = DataLoader(test_data, args.batch_size)
+    if args.type.split('.')[0] == 'deepgmr':
+        test_data = TestData(args.data_file, args)
 
-    model.load_state_dict(torch.load(args.checkpoint))
-    evaluate(model, test_loader, args.rmse_thresh, args.save_results, args.results_dir)
+    elif args.type.split('.')[0] == 'shapenet':
+        type = args.type.split('.')[1]
+        adv_options = args.type.split('.')[2]
+        test_data = ShapeNetDataset(args=args, type=type, from_file=False,
+                                   adv_option=adv_options)
+
+    elif args.type.split('.')[0] == 'ycb':
+        raise NotImplemented
+
+    else:
+        raise NotImplemented
+
+    if args.analyze_data:
+
+        rerr, terr = analyze_registration_dataset(test_data,
+                                                  ds_name=args.type,
+                                                  transform=deepgmrDataToStandardFormat())
+
+        plot_cdf(data=rerr, label="rotation", filename=str(args.type) + "rerr_test")
+        plot_cdf(data=terr, label="translation", filename=str(args.type) + "terr_test")
+
+        # saving
+        data_ = dict()
+        data_["rerr"] = rerr
+        data_["terr"] = terr
+
+        df = pd.DataFrame.from_dict(data_)
+        filename = './data_analysis/' + str(args.type) + '_test.csv'
+        df.to_csv(filename)
+
+    else:
+        writer = SummaryWriter()
+        args.log_dir = writer.logdir
+        args.results_dir = writer.logdir
+
+        # test_data = TestData(args.data_file, args)
+        test_loader = DataLoader(test_data, batch_size=args.batch_size)
+
+        model.load_state_dict(torch.load(args.checkpoint))
+        evaluate(model, test_loader, args.rmse_thresh, args.save_results, args.results_dir, writer=writer)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
