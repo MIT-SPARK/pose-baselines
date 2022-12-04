@@ -1,15 +1,18 @@
 import argparse
-import sys
 import torch
 import yaml
 
-sys.path.append('../..')
+from teaser_fpfh_icp import TEASER_FPFH_ICP
 
-from c3po.datasets.shapenet import CLASS_NAME, CLASS_ID, FixedDepthPC
+import sys
+sys.path.append('../')
+from shapenet import CLASS_NAME, CLASS_ID
+from utils_common import display_two_pcs
+# from c3po.datasets.shapenet import CLASS_NAME, CLASS_ID, FixedDepthPC
 from c3po.utils.loss_functions import certify
 from c3po.utils.evaluation_metrics import evaluation_error, add_s_error
-from c3po.baselines.teaser_fpfh_icp import TEASER_FPFH_ICP
-from c3po.utils.visualization_utils import display_two_pcs
+
+
 
 
 def eval_(class_id, model_id, hyper_param,

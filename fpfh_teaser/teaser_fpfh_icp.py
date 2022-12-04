@@ -3,11 +3,11 @@
 # import numpy as np
 import torch
 import copy
-import sys
 
-sys.path.append("../..")
-from c3po.baselines.teaser_utils.helpers import *
-from c3po.utils.general import pos_tensor_to_o3d
+import sys
+sys.path.append("../")
+from teaser_utils.helpers import *
+from utils_common import pos_tensor_to_o3d
 
 
 def teaser_fpfh_icp(source_points, target_points, voxel_size=0.05, visualize=False):
@@ -147,20 +147,17 @@ class TEASER_FPFH_ICP():
         return R, t
 
 
-
-
-
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
     # Load and visualize two point clouds from 3DMatch dataset
-    src = o3d.io.read_point_cloud('test_data/cloud_bin_0.ply')
-    tar = o3d.io.read_point_cloud('test_data/cloud_bin_4.ply')
+    # src = o3d.io.read_point_cloud('test_data/cloud_bin_0.ply')
+    # tar = o3d.io.read_point_cloud('test_data/cloud_bin_4.ply')
 
     # Convert o3d PointCloud to torch.tensors
-    source_points = torch.from_numpy(np.asarray(src.points).T)
-    target_points = torch.from_numpy(np.asarray(tar.points).T)
+    # source_points = torch.from_numpy(np.asarray(src.points).T)
+    # target_points = torch.from_numpy(np.asarray(tar.points).T)
 
     # Calling teaser (with FPFH correspondences) + ICP
-    R, t = teaser_fpfh_icp(source_points, target_points, voxel_size=0.05, visualize=True)
+    # R, t = teaser_fpfh_icp(source_points, target_points, voxel_size=0.05, visualize=True)
 
 

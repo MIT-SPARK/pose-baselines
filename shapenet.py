@@ -166,6 +166,14 @@ class SE3PointCloud(torch.utils.data.Dataset):
         self.num_of_points = num_of_points
         self.len = dataset_len
 
+        if self.class_name == 'all':
+            self.cad_model = None
+            self.model_keypoints = None
+        else:
+            class_name = self.class_name
+            self.cad_model = self._get_cad_models()
+            self.model_keypoints = self._get_model_keypoints()
+
     def __len__(self):
 
         return self.len
@@ -205,6 +213,66 @@ class SE3PointCloud(torch.utils.data.Dataset):
 
         return (pc1, pc2, kp1, kp2, R, t)
 
+    def _get_cad_models(self):
+        """
+        Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
+
+        output:
+        cad_models  : torch.tensor of shape (1, 3, self.num_of_points)
+
+        """
+
+        if self.class_name == 'all':
+            # randomly choose an object category name
+            raise ValueError(f"Specified class name ({self.class_name}) does not have a CAD model")
+        else:
+            class_name = self.class_name
+
+        class_id = CLASS_ID[class_name]
+        model_id = CLASS_MODEL_ID[class_name]
+
+        model_mesh, _, kp = get_model_and_keypoints(class_id, model_id)
+        center = model_mesh.get_center()
+        model_mesh.translate(-center)
+        # kp = kp - center
+        # kp1 = torch.from_numpy(kp).transpose(0, 1).to(torch.float)
+
+        # if self.n is None:
+        #     self.n = self.num_of_points
+        model_pcd = model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+
+        return model_pcd_torch.unsqueeze(0)
+
+    def _get_model_keypoints(self):
+        """
+        Returns keypoints of the ShapeNetCore model annotated in the KeypointNet dataset.
+
+        output:
+        model_keypoints : torch.tensor of shape (1, 3, N)
+
+        where
+        N = number of keypoints
+        """
+
+        if self.class_name == 'all':
+            # randomly choose an object category name
+            raise ValueError(f"Specified class name ({self.class_name}) does not have a CAD/Keypoints model")
+        else:
+            class_name = self.class_name
+
+        class_id = CLASS_ID[class_name]
+        model_id = CLASS_MODEL_ID[class_name]
+
+        model_mesh, _, kp = get_model_and_keypoints(class_id, model_id)
+        center = model_mesh.get_center()
+        # model_mesh.translate(-center)
+        kp = kp - center
+        keypoints = torch.from_numpy(kp).transpose(0, 1).to(torch.float)
+
+        return keypoints
+
 
 class DepthPC(torch.utils.data.Dataset):
     """
@@ -234,6 +302,14 @@ class DepthPC(torch.utils.data.Dataset):
         self.rotate_about_z = rotate_about_z
         self.camera_location = torch.tensor([1.0, 0.0, 0.0]).unsqueeze(-1)
         # set a camera location, with respect to the origin
+
+        if self.class_name == 'all':
+            self.cad_model = None
+            self.model_keypoints = None
+        else:
+            class_name = self.class_name
+            self.cad_model = self._get_cad_models()
+            self.model_keypoints = self._get_model_keypoints()
 
     def __len__(self):
 
@@ -344,6 +420,66 @@ class DepthPC(torch.utils.data.Dataset):
             pc = pc[:, random_idx]
 
         return pc
+
+    def _get_cad_models(self):
+        """
+        Returns a sampled point cloud of the ShapeNetcore model with self.num_of_points points.
+
+        output:
+        cad_models  : torch.tensor of shape (1, 3, self.num_of_points)
+
+        """
+
+        if self.class_name == 'all':
+            # randomly choose an object category name
+            raise ValueError(f"Specified class name ({self.class_name}) does not have a CAD model")
+        else:
+            class_name = self.class_name
+
+        class_id = CLASS_ID[class_name]
+        model_id = CLASS_MODEL_ID[class_name]
+
+        model_mesh, _, kp = get_model_and_keypoints(class_id, model_id)
+        center = model_mesh.get_center()
+        model_mesh.translate(-center)
+        # kp = kp - center
+        # kp1 = torch.from_numpy(kp).transpose(0, 1).to(torch.float)
+
+        # if self.n is None:
+        #     self.n = self.num_of_points
+        model_pcd = model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
+        model_pcd_torch = torch.from_numpy(np.asarray(model_pcd.points)).transpose(0, 1)  # (3, m)
+        model_pcd_torch = model_pcd_torch.to(torch.float)
+
+        return model_pcd_torch.unsqueeze(0)
+
+    def _get_model_keypoints(self):
+        """
+        Returns keypoints of the ShapeNetCore model annotated in the KeypointNet dataset.
+
+        output:
+        model_keypoints : torch.tensor of shape (1, 3, N)
+
+        where
+        N = number of keypoints
+        """
+
+        if self.class_name == 'all':
+            # randomly choose an object category name
+            raise ValueError(f"Specified class name ({self.class_name}) does not have a CAD/Keypoints model")
+        else:
+            class_name = self.class_name
+
+        class_id = CLASS_ID[class_name]
+        model_id = CLASS_MODEL_ID[class_name]
+
+        model_mesh, _, kp = get_model_and_keypoints(class_id, model_id)
+        center = model_mesh.get_center()
+        # model_mesh.translate(-center)
+        kp = kp - center
+        keypoints = torch.from_numpy(kp).transpose(0, 1).to(torch.float)
+
+        return keypoints
 
 
 # credit: pointnetlk_revisited. This induces rotation errors, which we use to create "easy" dataset.
@@ -596,23 +732,23 @@ class ShapeNet(torch.utils.data.Dataset):
         else:
             if self.type == 'real':
 
-                ds_ = DepthPC(class_name=self.class_name,
-                              dataset_len=self.length,
-                              num_of_points=self.num_points)
+                self.ds_ = DepthPC(class_name=self.class_name,
+                                   dataset_len=self.length,
+                                   num_of_points=self.num_points)
 
             elif self.type == 'sim':
-                ds_ = SE3PointCloud(class_name=self.class_name,
-                                    dataset_len=self.length,
-                                    num_of_points=self.num_points)
+                self.ds_ = SE3PointCloud(class_name=self.class_name,
+                                         dataset_len=self.length,
+                                         num_of_points=self.num_points)
             else:
                 raise ValueError
 
             if self.adv_option == 'hard':
-                self.ds = ds_
+                self.ds = self.ds_
             elif self.adv_option == 'easy':
-                self.ds = PointRegistrationEasy(ds_)
+                self.ds = PointRegistrationEasy(self.ds_)
             elif self.adv_option == 'medium':
-                self.ds = PointRegistrationMedium(ds_)
+                self.ds = PointRegistrationMedium(self.ds_)
             else:
                 raise ValueError
 
@@ -637,6 +773,14 @@ class ShapeNet(torch.utils.data.Dataset):
 
         with open(filename, 'wb') as f:
             pickle.dump(data_, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def _get_cad_models(self):
+
+        return self.ds_.cad_model
+
+    def _get_model_keypoints(self):
+
+        return self.ds_.model_keypoints
 
 
 
