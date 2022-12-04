@@ -8,6 +8,9 @@ import argparse
 from torch.utils.data import Dataset
 
 from data import get_rri, get_rri_cuda, jitter_pcd
+
+import sys
+sys.path.append("../")
 import shapenet
 
 

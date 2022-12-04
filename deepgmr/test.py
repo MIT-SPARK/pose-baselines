@@ -17,10 +17,13 @@ from tensorboardX import SummaryWriter
 from data import TestData
 from model import DeepGMR
 from pytorch3d import ops
+from utils_conversion import deepgmrDataToStandardFormat, ShapeNetDataset
 
+import sys
+sys.path.append("../")
 from utils_common import analyze_registration_dataset, plot_cdf, EvalData
 from utils_common import rotation_error, translation_error, adds_error
-from utils_conversion import deepgmrDataToStandardFormat, ShapeNetDataset
+
 
 CERT_EPSILON: dict = {
     'airplane': 0.999,

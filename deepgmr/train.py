@@ -16,8 +16,11 @@ import pandas as pd
 
 from data import TrainData
 from model import DeepGMR
-from utils_common import analyze_registration_dataset, plot_cdf
 from utils_conversion import deepgmrDataToStandardFormat, ShapeNetDataset
+
+import sys
+sys.path.append("../")
+from utils_common import analyze_registration_dataset, plot_cdf
 
 
 def train_one_epoch(epoch, model, loader, writer, log_freq, plot_freq):

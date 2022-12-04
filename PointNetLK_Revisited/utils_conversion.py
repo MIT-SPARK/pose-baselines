@@ -42,7 +42,6 @@ class convertToPNLKForm(torch.utils.data.Dataset):
         return pc0.T, pc1.T, T
 
     def save_dataset(self, filename):
-        from utils_common import display_two_pcs
         data_ = []
         len_ = len(self.ds)
         for i in tqdm(range(len_)):

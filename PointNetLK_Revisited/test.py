@@ -1,6 +1,5 @@
 """ part of source code from PointNetLK (https://github.com/hmgoforth/PointNetLK), modified. """
 
-import argparse
 import os
 import logging
 import torch
@@ -10,13 +9,16 @@ from torch.utils.tensorboard import SummaryWriter
 
 import data_utils
 # import shapenet_old as shapenet
-import shapenet
 import trainer
-import modelnet
 from test_config import options
-from utils_common import display_two_pcs, display_batch_pcs, analyze_registration_dataset, plot_cdf
 import pandas as pd
 from utils_conversion import convertToPNLKForm
+
+import sys
+sys.path.append("../")
+import shapenet
+from utils_common import analyze_registration_dataset, plot_cdf
+
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.addHandler(logging.NullHandler())

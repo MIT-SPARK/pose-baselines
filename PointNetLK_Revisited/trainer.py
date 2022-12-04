@@ -3,14 +3,16 @@
 import torch
 import numpy as np
 from scipy.spatial.transform import Rotation
-from tqdm import tqdm, auto
+from tqdm import tqdm
 import logging
 import open3d as o3d
 from open3d.web_visualizer import draw   # for notebook
-import pandas as pd
 
 import model
 import utils
+
+import sys
+sys.path.append("../")
 from utils_common import EvalData
 
 LOGGER = logging.getLogger(__name__)

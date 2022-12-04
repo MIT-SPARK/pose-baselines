@@ -1,38 +1,52 @@
 
 # analyze modelnet train data
-python -W ignore train.py \
---outfile logs/modelnet/ \
---dataset_path dataset/ModelNet/ \
---dataset_type modelnet \
---data_type synthetic \
---categoryfile dataset/modelnet40_half1.txt \
---analyze_data True
+#python -W ignore train.py \
+#--dataset_path dataset/ModelNet/ \
+#--dataset_type modelnet \
+#--categoryfile dataset/modelnet40_half1.txt \
+#--analyze_data True
 
 
 # analyze modelnet test data
+#python -W ignore test.py \
+#--dataset_path dataset/ModelNet/ \
+#--categoryfile ./dataset/modelnet40_half2.txt \
+#--dataset_type modelnet \
+#--analyze_data True
+
+
 python -W ignore test.py \
---outfile logs/modelnet/_test.txt \
---dataset_path dataset/ModelNet/ \
---categoryfile ./dataset/modelnet40_half2.txt \
---dataset_type modelnet \
---data_type synthetic \
+--dataset_type shapenet.sim.easy \
+--object all \
+--writer True \
 --analyze_data True
 
-
-# analyze shapenet train/test data
-python -W ignore train.py \
---outfile logs/shapenet_full/all/ \
---dataset_type shapenet_full \
+python -W ignore test.py \
+--dataset_type shapenet.sim.medium \
 --object all \
---data_type synthetic \
+--writer True \
 --analyze_data True
 
-
-
-# analyze shapenet easy train/test data
-python -W ignore train.py \
---outfile logs/shapenet_full_easy/all/ \
---dataset_type shapenet_full_easy \
+python -W ignore test.py \
+--dataset_type shapenet.sim.hard \
 --object all \
---data_type synthetic \
+--writer True \
+--analyze_data True
+
+python -W ignore test.py \
+--dataset_type shapenet.real.easy \
+--object all \
+--writer True \
+--analyze_data True
+
+python -W ignore test.py \
+--dataset_type shapenet.real.medium \
+--object all \
+--writer True \
+--analyze_data True
+
+python -W ignore test.py \
+--dataset_type shapenet.real.hard \
+--object all \
+--writer True \
 --analyze_data True
