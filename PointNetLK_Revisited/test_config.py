@@ -18,8 +18,9 @@ def options(argv=None):
     # settings for input data
     parser.add_argument('--dataset_type', default='3dmatch', type=str,
                         metavar='DATASET',
-                        choices=['modelnet', '3dmatch', 'shapenet', 'shapenet_full', 'shapenet_depth', 'modelnet_train',
-                                 'shapenet_full_easy', 'shapenet_depth_easy', 'shapenet_depth_easiest'],
+                        choices=['modelnet', '3dmatch', 'modelnet_train',
+                                 'shapenet.sim.easy', 'shapenet.sim.medium', 'shapenet.sim.hard',
+                                 'shapenet.real.easy', 'shapenet.real.medium', 'shapenet.real.hard'],
                         help='dataset type')
     parser.add_argument('--data_type', default='synthetic', type=str,
                         metavar='DATASET', help='whether data is synthetic or real')    #real means 3dmatch.

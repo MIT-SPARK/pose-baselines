@@ -11,7 +11,8 @@ from torch.utils.tensorboard import SummaryWriter
 import data_utils
 import trainer
 import modelnet
-import shapenet_old as shapenet
+# import shapenet_old as shapenet
+import shapenet
 from train_config import options
 from utils_common import display_two_pcs
 from utils_common import analyze_registration_dataset, plot_cdf
@@ -158,80 +159,92 @@ def get_datasets(args):
         trainset = data_utils.PointRegistration(traindata, data_utils.RandomTransformSE3(args.mag))
         evalset = data_utils.PointRegistration(evaldata, data_utils.RandomTransformSE3(args.mag))
 
-    elif args.dataset_type == 'shapenet_full_easy':
-        traindata = shapenet.ShapeNet(object=args.object,
-                                      num_of_points=args.num_points,
-                                      type='sim',
-                                      dataset_len=2048)
-        evaldata = shapenet.ShapeNet(object=args.object,
-                                     num_of_points=args.num_points,
-                                     type='sim',
-                                     dataset_len=512)
-        trainset = data_utils.PointRegistration(traindata, data_utils.RandomTransformSE3(args.mag))
-        evalset = data_utils.PointRegistration(evaldata, data_utils.RandomTransformSE3(args.mag))
-        # breakpoint()
-        # data = trainset[0]
+    elif args.dataset_type.split('.')[0] == 'shapenet':
+        type = args.dataset_type.split('.')[1]
+        adv_options = args.dataset_type.split('.')[2]
+        traindata = shapenet.ShapeNet(type=type, object=args.object, length=2048,
+                                      num_points=args.num_points, adv_option=adv_options)
+        evaldata = shapenet.ShapeNet(type=type, object=args.object, length=512,
+                                     num_points=args.num_points, adv_option=adv_options)
 
-    elif args.dataset_type == 'shapenet_depth_easy':
-        traindata = shapenet.ShapeNet(object=args.object,
-                                      num_of_points=args.num_points,
-                                      type='real',
-                                      dataset_len=2048)
-        evaldata = shapenet.ShapeNet(object=args.object,
-                                     num_of_points=args.num_points,
-                                     type='real',
-                                     dataset_len=512)
-        trainset = data_utils.PointRegistration(traindata, data_utils.RandomTransformSE3(args.mag))
-        evalset = data_utils.PointRegistration(evaldata, data_utils.RandomTransformSE3(args.mag))
+        from utils_conversion import convertToPNLKForm
+        trainset = convertToPNLKForm(traindata)
+        evalset = convertToPNLKForm(evaldata)
 
-    elif args.dataset_type == 'shapenet_full':
-        if args.object == 'all':
-            transform = torchvision.transforms.Compose([data_utils.OnUnitCube(),
-                                                        data_utils.Resampler(args.num_points)])
-
-            trainset = shapenet.ShapeNetDataset(num_points=args.num_points, type='sim',
-                                                dataset_length=2048, transform=transform)
-            evalset = shapenet.ShapeNetDataset(num_points=args.num_points, type='sim',
-                                               dataset_length=512, transform=transform)
-            # trainset = shapenet.SE3PointCloudAll(num_of_points=args.num_points, dataset_len=2048)
-            # evalset = shapenet.SE3PointCloudAll(num_of_points=args.num_points, dataset_len=512)
-
-        else:
-            transform = torchvision.transforms.Compose([data_utils.OnUnitCube(),
-                                                        data_utils.Resampler(args.num_points)])
-
-            trainset = shapenet.ShapeNetObjectDataset(object=args.object,
-                                                      num_points=args.num_points,
-                                                      type='sim',
-                                                      dataset_length=2048,
-                                                      transform=transform)
-            evalset = shapenet.ShapeNetObjectDataset(object=args.object,
-                                                     num_points=args.num_points,
-                                                     type='sim',
-                                                     dataset_length=512,
-                                                     transform=transform)
-    elif args.dataset_type == 'shapenet_depth':
-        if args.object == 'all':
-            transform = None
-
-            trainset = shapenet.ShapeNetDataset(num_points=args.num_points, type='real',
-                                                dataset_length=2048, transform=transform)
-            evalset = shapenet.ShapeNetDataset(num_points=args.num_points, type='real',
-                                               dataset_length=512, transform=transform)
-
-        else:
-            transform = None
-
-            trainset = shapenet.ShapeNetObjectDataset(object=args.object,
-                                                      num_points=args.num_points,
-                                                      type='real',
-                                                      dataset_length=2048,
-                                                      transform=transform)
-            evalset = shapenet.ShapeNetObjectDataset(object=args.object,
-                                                     num_points=args.num_points,
-                                                     type='real',
-                                                     dataset_length=512,
-                                                     transform=transform)
+    # elif args.dataset_type == 'shapenet_full_easy':
+    #     traindata = shapenet.ShapeNet(object=args.object,
+    #                                   num_of_points=args.num_points,
+    #                                   type='sim',
+    #                                   dataset_len=2048)
+    #     evaldata = shapenet.ShapeNet(object=args.object,
+    #                                  num_of_points=args.num_points,
+    #                                  type='sim',
+    #                                  dataset_len=512)
+    #     trainset = data_utils.PointRegistration(traindata, data_utils.RandomTransformSE3(args.mag))
+    #     evalset = data_utils.PointRegistration(evaldata, data_utils.RandomTransformSE3(args.mag))
+    #     # breakpoint()
+    #     # data = trainset[0]
+    #
+    # elif args.dataset_type == 'shapenet_depth_easy':
+    #     traindata = shapenet.ShapeNet(object=args.object,
+    #                                   num_of_points=args.num_points,
+    #                                   type='real',
+    #                                   dataset_len=2048)
+    #     evaldata = shapenet.ShapeNet(object=args.object,
+    #                                  num_of_points=args.num_points,
+    #                                  type='real',
+    #                                  dataset_len=512)
+    #     trainset = data_utils.PointRegistration(traindata, data_utils.RandomTransformSE3(args.mag))
+    #     evalset = data_utils.PointRegistration(evaldata, data_utils.RandomTransformSE3(args.mag))
+    #
+    # elif args.dataset_type == 'shapenet_full':
+    #     if args.object == 'all':
+    #         transform = torchvision.transforms.Compose([data_utils.OnUnitCube(),
+    #                                                     data_utils.Resampler(args.num_points)])
+    #
+    #         trainset = shapenet.ShapeNetDataset(num_points=args.num_points, type='sim',
+    #                                             dataset_length=2048, transform=transform)
+    #         evalset = shapenet.ShapeNetDataset(num_points=args.num_points, type='sim',
+    #                                            dataset_length=512, transform=transform)
+    #         # trainset = shapenet.SE3PointCloudAll(num_of_points=args.num_points, dataset_len=2048)
+    #         # evalset = shapenet.SE3PointCloudAll(num_of_points=args.num_points, dataset_len=512)
+    #
+    #     else:
+    #         transform = torchvision.transforms.Compose([data_utils.OnUnitCube(),
+    #                                                     data_utils.Resampler(args.num_points)])
+    #
+    #         trainset = shapenet.ShapeNetObjectDataset(object=args.object,
+    #                                                   num_points=args.num_points,
+    #                                                   type='sim',
+    #                                                   dataset_length=2048,
+    #                                                   transform=transform)
+    #         evalset = shapenet.ShapeNetObjectDataset(object=args.object,
+    #                                                  num_points=args.num_points,
+    #                                                  type='sim',
+    #                                                  dataset_length=512,
+    #                                                  transform=transform)
+    # elif args.dataset_type == 'shapenet_depth':
+    #     if args.object == 'all':
+    #         transform = None
+    #
+    #         trainset = shapenet.ShapeNetDataset(num_points=args.num_points, type='real',
+    #                                             dataset_length=2048, transform=transform)
+    #         evalset = shapenet.ShapeNetDataset(num_points=args.num_points, type='real',
+    #                                            dataset_length=512, transform=transform)
+    #
+    #     else:
+    #         transform = None
+    #
+    #         trainset = shapenet.ShapeNetObjectDataset(object=args.object,
+    #                                                   num_points=args.num_points,
+    #                                                   type='real',
+    #                                                   dataset_length=2048,
+    #                                                   transform=transform)
+    #         evalset = shapenet.ShapeNetObjectDataset(object=args.object,
+    #                                                  num_points=args.num_points,
+    #                                                  type='real',
+    #                                                  dataset_length=512,
+    #                                                  transform=transform)
     else:
         raise ValueError("dataset_type not correctly specified.")
 

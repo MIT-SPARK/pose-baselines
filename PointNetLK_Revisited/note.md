@@ -5,20 +5,27 @@ conda create --namel lk python=3.8
 conda activate lk
 conda install pip git
 pip install -r requirements.txt
-conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch
+conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch 
 ```
 
 My installations: seaborn, jupyter
 ```bash
 pip install seaborn 
 pip install notebook
-pip install tensorboard
- 
+pip install tensorboard 
 ```
 - tensorboard
 - seaborn
 - jupyter notebook
-- 
+
+
+Pytorch3D, I couldn't install
+```bash 
+conda install -c fvcore -c iopath -c conda-forge fvcore iopath
+conda install -c bottler nvidiacub 
+conda install pytorch3d -c pytorch3d 
+pip install "git+https://github.com/facebookresearch/pytorch3d.git@stable" 
+```
 
 
 Testing pre-trained model on their modelnet dataset

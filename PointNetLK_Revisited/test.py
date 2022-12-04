@@ -9,12 +9,14 @@ import torchvision
 from torch.utils.tensorboard import SummaryWriter
 
 import data_utils
-import shapenet_old as shapenet
+# import shapenet_old as shapenet
+import shapenet
 import trainer
 import modelnet
 from test_config import options
 from utils_common import display_two_pcs, display_batch_pcs, analyze_registration_dataset, plot_cdf
 import pandas as pd
+from utils_conversion import convertToPNLKForm
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.addHandler(logging.NullHandler())
@@ -131,48 +133,56 @@ def get_datasets(args):
                                                  args.voxel_ratio, args.voxel, args.max_voxel_points, 
                                                  args.num_voxels, args.pose_file, args.vis, args.voxel_after_transf)
 
-    elif args.dataset_type == 'shapenet_full_easy':
-        testdata = shapenet.ShapeNet(object=args.object,
-                                     num_of_points=args.num_points,
-                                     type='sim',
-                                     dataset_len=512)
-        testset = data_utils.PointRegistration(testdata, data_utils.RandomTransformSE3(args.mag))
+    elif args.dataset_type.split('.')[0] == 'shapenet':
+        type = args.dataset_type.split('.')[1]
+        adv_options = args.dataset_type.split('.')[2]
+        testdata = shapenet.ShapeNet(type=type, object=args.object, length=512,
+                                     num_points=args.num_points, adv_option=adv_options)
 
-    elif args.dataset_type == 'shapenet_depth_easiest':
-        # easiest: assumes the exact knowledge of occlusion (case equal to lk paper)
-        testdata = shapenet.ShapeNet(object=args.object,
-                                     num_of_points=args.num_points,
-                                     type='real',
-                                     dataset_len=512)
-        testset = data_utils.PointRegistration(testdata, data_utils.RandomTransformSE3(args.mag))
+        testset = convertToPNLKForm(testdata)
 
-    elif args.dataset_type == 'shapenet_full':
-        if args.object == 'all':
-            testset = shapenet.ShapeNetDataset(num_points=args.num_points, type='sim', dataset_length=512)
-
-        else:
-            testset = shapenet.ShapeNetObjectDataset(object=args.object,
-                                                     num_points=args.num_points,
-                                                     type='sim',
-                                                     dataset_length=512)
-    elif args.dataset_type == 'shapenet_depth':
-        if args.object == 'all':
-            testset = shapenet.ShapeNetDataset(num_points=args.num_points,
-                                               type='real',
-                                               dataset_length=512)
-
-        else:
-            testset = shapenet.ShapeNetObjectDataset(object=args.object,
-                                                     num_points=args.num_points,
-                                                     type='real',
-                                                     dataset_length=512)
-
-    elif args.dataset_type == 'shapenet_depth_easy':
-        testdata = shapenet.ShapeNet(object=args.object,
-                                     num_of_points=args.num_points,
-                                     type='real',
-                                     dataset_len=512)
-        testset = data_utils.PointRegistrationEasy(testdata, data_utils.RandomTransformSE3(args.mag))
+    # elif args.dataset_type == 'shapenet_full_easy':
+    #     testdata = shapenet.ShapeNet(object=args.object,
+    #                                  num_of_points=args.num_points,
+    #                                  type='sim',
+    #                                  dataset_len=512)
+    #     testset = data_utils.PointRegistration(testdata, data_utils.RandomTransformSE3(args.mag))
+    #
+    # elif args.dataset_type == 'shapenet_depth_easiest':
+    #     # easiest: assumes the exact knowledge of occlusion (case equal to lk paper)
+    #     testdata = shapenet.ShapeNet(object=args.object,
+    #                                  num_of_points=args.num_points,
+    #                                  type='real',
+    #                                  dataset_len=512)
+    #     testset = data_utils.PointRegistration(testdata, data_utils.RandomTransformSE3(args.mag))
+    #
+    # elif args.dataset_type == 'shapenet_full':
+    #     if args.object == 'all':
+    #         testset = shapenet.ShapeNetDataset(num_points=args.num_points, type='sim', dataset_length=512)
+    #
+    #     else:
+    #         testset = shapenet.ShapeNetObjectDataset(object=args.object,
+    #                                                  num_points=args.num_points,
+    #                                                  type='sim',
+    #                                                  dataset_length=512)
+    # elif args.dataset_type == 'shapenet_depth':
+    #     if args.object == 'all':
+    #         testset = shapenet.ShapeNetDataset(num_points=args.num_points,
+    #                                            type='real',
+    #                                            dataset_length=512)
+    #
+    #     else:
+    #         testset = shapenet.ShapeNetObjectDataset(object=args.object,
+    #                                                  num_points=args.num_points,
+    #                                                  type='real',
+    #                                                  dataset_length=512)
+    #
+    # elif args.dataset_type == 'shapenet_depth_easy':
+    #     testdata = shapenet.ShapeNet(object=args.object,
+    #                                  num_of_points=args.num_points,
+    #                                  type='real',
+    #                                  dataset_len=512)
+    #     testset = data_utils.PointRegistrationEasy(testdata, data_utils.RandomTransformSE3(args.mag))
 
     else:
         raise ValueError("dataset_type not correctly specified.")

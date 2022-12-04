@@ -12,6 +12,8 @@ def options(argv=None):
 
     # settings for input data
     parser.add_argument('--dataset_type', default='modelnet', type=str,
+                        choices=['modelnet', 'shapenet.sim.easy', 'shapenet.sim.medium', 'shapenet.sim.hard',
+                                 'shapenet.real.easy', 'shapenet.real.medium', 'shapenet.real.hard'],
                         metavar='DATASET', help='dataset type')
     parser.add_argument('--object', default='all', type=str,
                         metavar='DATASET', help='shapenet object class name')
