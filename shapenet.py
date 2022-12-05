@@ -5,6 +5,7 @@ import json
 import torch
 import open3d as o3d
 from tqdm import tqdm
+import math
 from pathlib import Path
 import argparse
 import copy
@@ -285,7 +286,7 @@ class DepthPC(torch.utils.data.Dataset):
 
     """
     def __init__(self, class_name, num_of_points=1024, radius_multiple=torch.tensor([1.2, 3.0]),
-                 dataset_len=1024, rotate_about_z=False):
+                 dataset_len=1024, rotate_about_z=True):
         """
         class_id        : str   : class id of a ShapeNetCore object
         model_id        : str   : model id of a ShapeNetCore object
@@ -302,6 +303,7 @@ class DepthPC(torch.utils.data.Dataset):
         self.rotate_about_z = rotate_about_z
         self.camera_location = torch.tensor([1.0, 0.0, 0.0]).unsqueeze(-1)
         # set a camera location, with respect to the origin
+        self.pi = math.pi
 
         if self.class_name == 'all':
             self.cad_model = None

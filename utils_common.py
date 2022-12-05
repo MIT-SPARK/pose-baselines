@@ -1,5 +1,3 @@
-# RT: These are utils that I am using in evaluating PointNetLK_Revisited.
-
 
 import open3d as o3d
 import torch
@@ -179,6 +177,58 @@ def display_two_pcs(pc1, pc2):
     o3d.visualization.draw_geometries([object1, object2])
 
     return None
+
+
+def visualize_model_n_keypoints(model_list, keypoints_xyz, camera_locations=o3d.geometry.PointCloud()):
+    """
+    Displays one or more models and keypoints.
+    :param model_list: list of o3d Geometry objects to display
+    :param keypoints_xyz: list of 3d coordinates of keypoints to visualize
+    :param camera_locations: optional camera location to display
+    :return: list of o3d.geometry.TriangleMesh mesh objects as keypoint markers
+    """
+    d = 0
+    for model in model_list:
+        max_bound = model.get_max_bound()
+        min_bound = model.get_min_bound()
+        d = max(np.linalg.norm(max_bound - min_bound, ord=2), d)
+
+    keypoint_radius = 0.01 * d
+
+    keypoint_markers = []
+    for xyz in keypoints_xyz:
+        new_mesh = o3d.geometry.TriangleMesh.create_sphere(radius=keypoint_radius)
+        new_mesh.translate(xyz)
+        new_mesh.paint_uniform_color([0.8, 0.0, 0.0])
+        keypoint_markers.append(new_mesh)
+
+    camera_locations.paint_uniform_color([0.1, 0.5, 0.1])
+    o3d.visualization.draw_geometries(keypoint_markers + model_list + [camera_locations])
+
+    return keypoint_markers
+
+
+def visualize_torch_model_n_keypoints(cad_models, model_keypoints):
+    """
+    cad_models      : torch.tensor of shape (B, 3, m)
+    model_keypoints : torch.tensor of shape (B, 3, N)
+
+    """
+    batch_size = model_keypoints.shape[0]
+
+    for b in range(batch_size):
+
+        point_cloud = cad_models[b, ...]
+        keypoints = model_keypoints[b, ...].cpu()
+
+        point_cloud = pos_tensor_to_o3d(pos=point_cloud)
+        point_cloud = point_cloud.paint_uniform_color([0.0, 0.0, 1])
+        point_cloud.estimate_normals()
+        keypoints = keypoints.transpose(0, 1).numpy()
+
+        visualize_model_n_keypoints([point_cloud], keypoints_xyz=keypoints)
+
+    return 0
 
 
 def analyze_registration_dataset(ds: Dataset, ds_name: str, transform=None) -> tuple:

@@ -1,21 +1,18 @@
-import copy
-import csv
-import json
+# import copy
+# import csv
+# import json
 import numpy as np
 import open3d as o3d
 import os
-import pytorch3d
+# import pytorch3d
 import sys
 import torch
 from pytorch3d import transforms, ops
+from utils_common import visualize_model_n_keypoints, visualize_torch_model_n_keypoints
 
-DATASET_PATH: str = '../../data/ycb/models/ycb/'
+# DATASET_PATH: str = '../../data/ycb/models/ycb/'
+DATASET_PATH: str = "./data_ycb/ycb/models/ycb/"
 sys.path.append("../../")
-
-from c3po.models.modelgen import ModelFromShape
-from c3po.utils.general import pos_tensor_to_o3d
-from c3po.utils.visualization_utils import visualize_model_n_keypoints, visualize_torch_model_n_keypoints
-import c3po.utils.general as gu
 
 MODEL_TO_KPT_GROUPS = {
     "003_cracker_box": [set([0,1,3,4]), set([0,1,2,5]), set([1,2,3,7]), set([0,2,3,6]), \
@@ -178,6 +175,7 @@ class SE3PointCloudYCB(torch.utils.data.Dataset):
 
         return 0
 
+
 class SE3PointCloudYCBAugment(torch.utils.data.Dataset):
     """
     Given model_id, and number of points generates various point clouds and SE3 transformations
@@ -283,6 +281,7 @@ class SE3PointCloudYCBAugment(torch.utils.data.Dataset):
         visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
 
         return 0
+
 
 class DepthYCB(torch.utils.data.Dataset):
     """
@@ -713,6 +712,8 @@ class MixedDepthYCBAugment(torch.utils.data.Dataset):
         visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
 
         return 0
+
+
 
 
 if __name__ == "__main__":

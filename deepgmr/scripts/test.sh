@@ -1,5 +1,5 @@
-#MODEL_FILE="models/modelnet_noisy.pth"
-MODEL_FILE="runs/Nov29_23-15-54_spark-agent/_model_best.pth"
+MODEL_FILE="models/modelnet_noisy.pth"
+#MODEL_FILE="runs/Nov29_23-15-54_spark-agent/_model_best.pth"
 
 python test.py --data_file data/test/modelnet_noisy.h5 \
 --checkpoint $MODEL_FILE \
