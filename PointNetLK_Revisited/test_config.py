@@ -20,7 +20,8 @@ def options(argv=None):
                         metavar='DATASET',
                         choices=['modelnet', '3dmatch', 'modelnet_train',
                                  'shapenet.sim.easy', 'shapenet.sim.medium', 'shapenet.sim.hard',
-                                 'shapenet.real.easy', 'shapenet.real.medium', 'shapenet.real.hard'],
+                                 'shapenet.real.easy', 'shapenet.real.medium', 'shapenet.real.hard',
+                                 'ycb.sim', 'ycb.real'],
                         help='dataset type')
     parser.add_argument('--data_type', default='synthetic', type=str,
                         metavar='DATASET', help='whether data is synthetic or real')    #real means 3dmatch.

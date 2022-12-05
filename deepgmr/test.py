@@ -17,32 +17,12 @@ from tensorboardX import SummaryWriter
 from data import TestData
 from model import DeepGMR
 from pytorch3d import ops
-from utils_conversion import deepgmrDataToStandardFormat, ShapeNetDataset
+from utils_conversion import deepgmrDataToStandardFormat, ShapeNetDataset, YCBDataset
 
 import sys
 sys.path.append("../")
 from utils_common import analyze_registration_dataset, plot_cdf, EvalData
 from utils_common import rotation_error, translation_error, adds_error
-
-
-CERT_EPSILON: dict = {
-    'airplane': 0.999,
-    'bathtub': 0.998,
-    'bed': 0.998,
-    'bottle': 0.99,
-    'cap': 0.99,
-    'car': 0.999,
-    'chair': 0.999,
-    'guitar': 0.9995,
-    'helmet': 0.998,
-    'knife': 0.9995,
-    'laptop': 0.995,
-    'motorcycle': 0.999,
-    'mug': 0.995,
-    'skateboard': 0.999,
-    'table': 0.99,
-    'vessel': 0.999
-}
 
 
 def evaluate(model, loader, rmse_thresh, save_results=False, results_dir=None, writer=None):
@@ -126,7 +106,12 @@ if __name__ == "__main__":
     parser.add_argument('--k', type=int, default=20)
 
     # new for baseline
-    parser.add_argument('--type', type=str, default='deepgmr')
+    parser.add_argument('--type', type=str,
+                        choices=['deepgmr',
+                                 'shapenet.sim.easy', 'shapenet.sim.medium', 'shapenet.sim.hard',
+                                 'shapenet.real.easy', 'shapenet.real.medium', 'shapenet.real.hard',
+                                 'ycb.sim', 'ycb.real'],
+                        default='deepgmr')
     #       'deepgmr', 'shapenet.sim', 'shapenet.real', 'ycb.sim', 'ycb.real'
     # shapenet specific
     parser.add_argument('--analyze_data', type=bool, default=False)
@@ -156,11 +141,12 @@ if __name__ == "__main__":
                                    adv_option=adv_options)
 
     elif args.type.split('.')[0] == 'ycb':
-        raise NotImplemented
-
+        type = args.type.split('.')[1]
+        test_data = YCBDataset(args=args, type=type, split='test', from_file=False)
     else:
         raise NotImplemented
 
+    # breakpoint()
     if args.analyze_data:
 
         rerr, terr = analyze_registration_dataset(test_data,

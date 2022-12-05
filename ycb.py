@@ -724,7 +724,7 @@ class MixedDepthYCBAugment(torch.utils.data.Dataset):
 class wrapperYCB(torch.utils.data.Dataset):
     def __init__(self, ycb_dataset):
         self.ds = ycb_dataset
-        self.pc0 = self.ds._get_cad_model().squeeze(0)
+        self.pc0 = self.ds._get_cad_models().squeeze(0)
         self.kp0 = self.ds._get_model_keypoints().squeeze(0)
 
     def __len__(self):
@@ -758,7 +758,7 @@ class YCB(torch.utils.data.Dataset):
         # sim: full point clouds
         # real: depth point clouds
 
-        assert object in OBJECT_CATEGORIES + ['all']
+        assert object in OBJECT_CATEGORIES
         # object: category name in ShapeNet
 
         assert split in ['train', 'test', 'val']
@@ -827,11 +827,11 @@ class YCB(torch.utils.data.Dataset):
 
     def _get_cad_models(self):
 
-        return self.ds_.cad_model
+        return self.ds_._get_cad_model()
 
     def _get_model_keypoints(self):
 
-        return self.ds_.model_keypoints
+        return self.ds_._get_model_keypoints()
 
 
 if __name__ == "__main__":

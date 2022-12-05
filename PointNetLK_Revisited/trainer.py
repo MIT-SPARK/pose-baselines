@@ -6,7 +6,7 @@ from scipy.spatial.transform import Rotation
 from tqdm import tqdm
 import logging
 import open3d as o3d
-from open3d.web_visualizer import draw   # for notebook
+# from open3d.web_visualizer import draw   # for notebook
 
 import model
 import utils
@@ -161,7 +161,7 @@ class TrainerAnalyticalPointNetLK:
             temp_ = 0.5 * (torch.trace(Rmat_est.T @ Rmat_gt) - 1)
             temp1 = torch.min(torch.tensor([temp_, 0.999]))
             temp2 = torch.max(torch.tensor([temp1, -0.999]))
-            angle_err_ = torch.arccos_(temp2)
+            angle_err_ = torch.acos(temp2)
             trans_err_ = torch.norm(tmat_est - tmat_gt)
             Z = (Rmat_gt @ X + tmat_gt) - (Rmat_est @ X + tmat_est)
             del Rmat_gt, Rmat_est, tmat_gt, tmat_est, X

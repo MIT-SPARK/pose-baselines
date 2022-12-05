@@ -7,6 +7,7 @@ from teaser_fpfh_icp import TEASER_FPFH_ICP
 import sys
 sys.path.append('../')
 from shapenet import ShapeNet
+from ycb import YCB
 from utils_common import display_two_pcs
 from utils_common import adds_error, rotation_error, translation_error
 from utils_common import EvalData
@@ -23,6 +24,12 @@ def evaluate(dataset_name, object, visualize=False):
         adv_option = dataset_name.split('.')[2]
         eval_dataset = ShapeNet(type=type, object=object, length=512, num_points=1024, adv_option=adv_option)
         eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=1, shuffle=False)
+
+    elif dataset_name.split('.')[0] == 'ycb':
+        type = dataset_name.split('.')[1]
+        eval_dataset = YCB(type=type, object=object, length=512, num_points=1024, split='test')
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=1, shuffle=False)
+
     else:
         raise NotImplementedError
 
@@ -102,7 +109,8 @@ def evaluate(dataset_name, object, visualize=False):
 if __name__ == "__main__":
     """
     usage: 
-    >> python evaluate_teaser_fpfh_icp.py --dataset shapenet.sim.easy --object chair 
+    >> python evaluate_fpfh_teaser_icp.py --dataset shapenet.sim.easy --object chair
+    >> python evaluate_fpfh_teaser_icp.py --dataset ycb.real --object 006_mustard_bottle
 
     """
 
@@ -111,7 +119,7 @@ if __name__ == "__main__":
                         help="The ShapeNet/YCB object's class name.",
                         type=str)
     parser.add_argument('--dataset',
-                        choices=['ycb',
+                        choices=['ycb.sim', 'ycb.real',
                                  'shapenet.sim.easy', 'shapenet.sim.medium', 'shapenet.sim.hard',
                                  'shapenet.real.easy', 'shapenet.real.medium', 'shapenet.real.hard'],
                         help="Dataset name",

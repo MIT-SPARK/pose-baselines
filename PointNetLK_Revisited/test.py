@@ -17,6 +17,7 @@ from utils_conversion import convertToPNLKForm
 import sys
 sys.path.append("../")
 import shapenet
+import ycb
 from utils_common import analyze_registration_dataset, plot_cdf
 
 
@@ -141,6 +142,11 @@ def get_datasets(args):
         testdata = shapenet.ShapeNet(type=type, object=args.object, length=512,
                                      num_points=args.num_points, adv_option=adv_options)
 
+        testset = convertToPNLKForm(testdata)
+
+    elif args.dataset_type.split('.')[0] == 'ycb':
+        type = args.dataset_type.split('.')[1]
+        testdata = ycb.YCB(type=type, object=args.object, length=512, num_points=args.num_points, split='test')
         testset = convertToPNLKForm(testdata)
 
     # elif args.dataset_type == 'shapenet_full_easy':
