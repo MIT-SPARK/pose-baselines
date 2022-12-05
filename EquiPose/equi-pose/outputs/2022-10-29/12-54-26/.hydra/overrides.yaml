@@ -1,0 +1,6 @@
+- exp_num=0.921r
+- training=partial_pcloud
+- dataset=modelnet40_partial
+- category=chair
+- eval=True
+- save=True

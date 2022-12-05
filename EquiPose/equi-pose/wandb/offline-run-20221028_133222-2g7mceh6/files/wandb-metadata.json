@@ -1,0 +1,30 @@
+{
+    "os": "Linux-5.15.0-52-generic-x86_64-with-glibc2.17",
+    "python": "3.8.13",
+    "heartbeatAt": "2022-10-28T17:32:23.119698",
+    "startedAt": "2022-10-28T17:32:22.460392",
+    "docker": null,
+    "gpu": "NVIDIA GeForce RTX 2080 Super with Max-Q Design",
+    "gpu_count": 1,
+    "cpu_count": 16,
+    "cuda": null,
+    "args": [
+        "exp_num=1.0",
+        "training=complete_pcloud",
+        "dataset=modelnet40_complete",
+        "category=airplane",
+        "use_wandb=True"
+    ],
+    "state": "running",
+    "program": "main.py",
+    "codePath": "main.py",
+    "git": {
+        "remote": "https://github.com/dragonlong/equi-pose.git",
+        "commit": "f73bc858cf9029cd2e967b10033d1182b15f6956"
+    },
+    "email": "talak@mit.edu",
+    "root": "/home/spark-agent/Dropbox (MIT)/HandsOn/EquiPose/equi-pose",
+    "host": "spark-agent",
+    "username": "spark-agent",
+    "executable": "/home/spark-agent/anaconda3/envs/equi-pose/bin/python"
+}

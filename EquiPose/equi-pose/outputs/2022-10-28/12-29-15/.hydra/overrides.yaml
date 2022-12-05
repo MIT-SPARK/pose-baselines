@@ -1,0 +1,5 @@
+- exp_num=1.0
+- training=complete_pcloud
+- dataset=shapenet_full
+- category=airplane
+- use_wandb=True

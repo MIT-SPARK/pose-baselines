@@ -1,0 +1,6 @@
+- exp_num=0.813
+- training=partial_pcloud
+- dataset=modelnet40_partial
+- category=airplane
+- eval=True
+- save=True
