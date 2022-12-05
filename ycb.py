@@ -4,6 +4,8 @@
 import numpy as np
 import open3d as o3d
 import os
+import pickle
+from tqdm import tqdm
 # import pytorch3d
 import sys
 import torch
@@ -15,28 +17,35 @@ DATASET_PATH: str = "./data_ycb/ycb/models/ycb/"
 sys.path.append("../../")
 
 MODEL_TO_KPT_GROUPS = {
-    "003_cracker_box": [set([0,1,3,4]), set([0,1,2,5]), set([1,2,3,7]), set([0,2,3,6]), \
+    "003_cracker_box": [set([0,1,3,4]), set([0,1,2,5]), set([1,2,3,7]), set([0,2,3,6]),
                         set([4,5,6,0]), set([4,5,7,1]), set([5,6,7,2]), set([4,6,7,3])],
-    "004_sugar_box": [set([0,1,3,6]), set([0,1,2,7]), set([0,2,3,5]), set([1,2,3,4]), \
+    "004_sugar_box": [set([0,1,3,6]), set([0,1,2,7]), set([0,2,3,5]), set([1,2,3,4]),
                       set([4,6,7,1]), set([6,7,5,0]), set([4,5,7,2]), set([4,5,6,3])],
-    "008_pudding_box": [set([0,1,2,6]), set([0,1,3,7]), set([1,2,3,5]), set([0,2,3,4]), \
+    "008_pudding_box": [set([0,1,2,6]), set([0,1,3,7]), set([1,2,3,5]), set([0,2,3,4]),
                         set([4,6,7,0]), set([5,6,7,1]), set([4,5,7,3]), set([4,5,6,2])],
-    "009_gelatin_box": [set([0,1,3,6]), set([0,1,2,7]), set([1,2,3,5]), set([0,2,3,4]), \
+    "009_gelatin_box": [set([0,1,3,6]), set([0,1,2,7]), set([1,2,3,5]), set([0,2,3,4]),
                         set([4,6,7,0]), set([5,6,7,1]), set([4,5,7,2]), set([4,5,6,3])],
-    "010_potted_meat_can": [set([1,2,3,7]), set([0,2,3,6]), set([0,1,3,5]), set([0,1,2,4]), \
+    "010_potted_meat_can": [set([1,2,3,7]), set([0,2,3,6]), set([0,1,3,5]), set([0,1,2,4]),
                             set([4,6,7,2]), set([5,6,7,3]), set([4,5,6,0]), set([4,5,7,1])],
     "019_pitcher_base": [set([8]), set([10])],
     "035_power_drill": [set([9]), set([10]), set([11]), set([12])],
-    "036_wood_block": [set([0,2,3,7]), set([1,2,3,6]), set([0,1,2,5]), set([0,1,3,4]), \
+    "036_wood_block": [set([0,2,3,7]), set([1,2,3,6]), set([0,1,2,5]), set([0,1,3,4]),
                         set([4,6,7,3]), set([5,6,7,2]), set([4,5,6,1]), set([4,5,7,0])],
-    "061_foam_brick": [set([0,2,3,5]), set([1,2,3,4]), set([0,1,3,7]), set([0,1,2,6]), \
+    "061_foam_brick": [set([0,2,3,5]), set([1,2,3,4]), set([0,1,3,7]), set([0,1,2,6]),
                         set([4,5,6,2]), set([4,5,7,3]), set([4,6,7,1]), set([5,6,7,0])]
     }
 
-SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "003_cracker_box", "004_sugar_box", \
-                       "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box" \
-                       "009_gelatin_box", "010_potted_meat_can", "036_wood_block", "040_large_marker", \
+SYMMETRIC_MODEL_IDS = ["001_chips_can", "002_master_chef_can", "003_cracker_box", "004_sugar_box",
+                       "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box",
+                       "009_gelatin_box", "010_potted_meat_can", "036_wood_block", "040_large_marker",
                        "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
+
+
+OBJECT_CATEGORIES = ["001_chips_can", "002_master_chef_can", "003_cracker_box", "004_sugar_box",
+                     "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box",
+                     "009_gelatin_box", "010_potted_meat_can", "011_banana", "019_pitcher_base",
+                     "021_bleach_cleanser", "035_power_drill", "036_wood_block", "037_scissors",
+                     "040_large_marker", "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
 
 
 def get_model_and_keypoints(model_id):
@@ -104,7 +113,6 @@ class SE3PointCloudYCB(torch.utils.data.Dataset):
 
         # size of the model
         self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
-
 
     def __len__(self):
         return self.len
@@ -207,7 +215,6 @@ class SE3PointCloudYCBAugment(torch.utils.data.Dataset):
 
         # size of the model
         self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
-
 
     def __len__(self):
         return self.len
@@ -317,7 +324,6 @@ class DepthYCB(torch.utils.data.Dataset):
             self.filter_degenerate(MODEL_TO_KPT_GROUPS)
 
         print("dataset len", self.len)
-
 
     def filter_degenerate(self, model_to_groups):
         """
@@ -463,6 +469,7 @@ class DepthYCB(torch.utils.data.Dataset):
 
         return 0
 
+
 class DepthYCBAugment(torch.utils.data.Dataset):
     """
     Given model_id and split, get real depth images from YCB dataset.
@@ -496,7 +503,6 @@ class DepthYCBAugment(torch.utils.data.Dataset):
 
         # size of the model
         self.diameter = np.linalg.norm(np.asarray(self.model_mesh.get_max_bound()) - np.asarray(self.model_mesh.get_min_bound()))
-
 
     def __len__(self):
 
@@ -583,6 +589,7 @@ class DepthYCBAugment(torch.utils.data.Dataset):
         visualize_torch_model_n_keypoints(cad_models=cad_models, model_keypoints=model_keypoints)
 
         return 0
+
 
 class MixedDepthYCBAugment(torch.utils.data.Dataset):
     """
@@ -714,6 +721,117 @@ class MixedDepthYCBAugment(torch.utils.data.Dataset):
         return 0
 
 
+class wrapperYCB(torch.utils.data.Dataset):
+    def __init__(self, ycb_dataset):
+        self.ds = ycb_dataset
+        self.pc0 = self.ds._get_cad_model().squeeze(0)
+        self.kp0 = self.ds._get_model_keypoints().squeeze(0)
+
+    def __len__(self):
+        return len(self.ds)
+
+    def __getitem__(self, item):
+
+        pc1, kp1, R, t = self.ds[item]
+
+        return (self.pc0, pc1, self.kp0, kp1, R, t)
+
+    def _get_cad_model(self):
+        return self.pc0
+
+    def _get_model_keypoints(self):
+        return self.kp0
+
+
+from utils_dataset import PointRegistrationMedium, PointRegistrationEasy
+
+
+class YCB(torch.utils.data.Dataset):
+    def __init__(self, type, object, length, num_points, split, adv_option='hard', from_file=False, filename=None):
+
+        assert adv_option in ['hard', 'medium', 'easy']
+        # hard: c3po rotation errors
+        # easy: lk rotation errors
+        # medium: deepgmr rotation errors
+
+        assert type in ['sim', 'real']
+        # sim: full point clouds
+        # real: depth point clouds
+
+        assert object in OBJECT_CATEGORIES + ['all']
+        # object: category name in ShapeNet
+
+        assert split in ['train', 'test', 'val']
+        # train/test/val
+
+        self.type = type
+        self.class_name = object
+        self.length = length
+        self.num_points = num_points
+        self.split = split
+
+        self.adv_option = adv_option
+        self.from_file = from_file
+        self.filename = filename
+
+        if self.from_file:
+            with open(self.filename, 'rb') as f:
+                self.data_ = pickle.load(f)
+
+        else:
+            if self.type == 'real':
+
+                ds_ = DepthYCBAugment(model_id=self.class_name,
+                                      split=self.split,
+                                      num_of_points=self.num_points)
+
+            elif self.type == 'sim':
+                ds_ = SE3PointCloudYCBAugment(model_id=self.class_name,
+                                              num_of_points=self.num_points,
+                                              dataset_len=self.length)
+            else:
+                raise ValueError
+
+            self.ds_ = wrapperYCB(ds_)
+
+            if self.adv_option == 'hard':
+                self.ds = self.ds_
+            elif self.adv_option == 'easy':
+                self.ds = PointRegistrationEasy(self.ds_)
+            elif self.adv_option == 'medium':
+                self.ds = PointRegistrationMedium(self.ds_)
+            else:
+                raise ValueError
+
+    def __len__(self):
+        return self.ds.__len__()
+
+    def __getitem__(self, item):
+
+        if self.from_file:
+            pc1, pc2, kp1, kp2, R, t = self.data_[item]
+        else:
+            pc1, pc2, kp1, kp2, R, t = self.ds[item]
+
+        return (pc1, pc2, kp1, kp2, R, t)
+
+    def save_dataset(self, filename):
+
+        data_ = []
+        for i in tqdm(range(self.ds.__len__())):
+            data = self.ds[i]
+            data_.append(data)
+
+        with open(filename, 'wb') as f:
+            pickle.dump(data_, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def _get_cad_models(self):
+
+        return self.ds_.cad_model
+
+    def _get_model_keypoints(self):
+
+        return self.ds_.model_keypoints
 
 
 if __name__ == "__main__":
