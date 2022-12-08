@@ -8,7 +8,7 @@ import pandas as pd
 import seaborn as sns
 import pickle
 import matplotlib.pyplot as plt
-from pytorch3d import ops
+# from pytorch3d import ops
 
 
 def translation_error(t, t_):
@@ -21,9 +21,9 @@ def translation_error(t, t_):
     t_err: torch.tensor of shape (1, 1) or (B, 1)
     """
     if t.dim() == 2:
-        err = torch.norm(t - t_, p=2)/3.0
+        err = torch.norm(t - t_, p=2)
     elif t.dim() == 3:
-        err = torch.norm(t-t_, p=2, dim=1)/3.0
+        err = torch.norm(t-t_, p=2, dim=1)
     else:
         raise ValueError
 
@@ -40,16 +40,43 @@ def rotation_error(R, R_):
     R_err: torch.tensor of shape (1, 1) or (B, 1)
     """
 
+    epsilon = 1e-8
     if R.dim() == 2:
-        err = torch.acos(0.5*(torch.trace(R.T @ R)-1))
+        error = 0.5*(torch.trace(R.T @ R_) - 1)
+        err = torch.acos(torch.clamp(error, -1 + epsilon, 1 - epsilon))
     elif R.dim() == 3:
         error = 0.5 * (torch.einsum('bii->b', torch.transpose(R, -1, -2) @ R_) - 1).unsqueeze(-1)
-        epsilon = 1e-8
         err = torch.acos(torch.clamp(error, -1 + epsilon, 1 - epsilon))
     else:
         raise ValueError
 
     return err
+
+
+def chamfer_dist_(pc, pc_, max_loss=False):
+    """
+       inputs:
+       pc  : torch.tensor of shape (B, 3, n)
+       pc_ : torch.tensor of shape (B, 3, m)
+       max_loss : boolean : indicates if output loss should be maximum of the distances between pc and pc_ instead of the mean
+
+       output:
+       loss    : torch tensor of shape (B, 1)
+           returns max_loss if max_loss is true
+    """
+
+    B = pc.shape[0]
+
+    for idx in range(B):
+        pcd0 = pos_tensor_to_o3d(pc[idx, ...])
+        pcd1 = pos_tensor_to_o3d(pc_[idx, ...])
+
+        dist01 = pcd0.compute_point_cloud_distance(pcd1)
+        dist10 = pcd1.compute_point_cloud_distance(pcd0)
+        breakpoint()
+        #TODO: replace chamfer_dist, with this function. it may be slow. but will help.
+
+    return None
 
 
 def chamfer_dist(pc, pc_, max_loss=False):
@@ -115,6 +142,7 @@ def pos_tensor_to_o3d(pos, estimate_normals=True):
     output:
     open3d PointCloud
     """
+    # breakpoint()
     pos_o3d = o3d.utility.Vector3dVector(pos.transpose(0, 1).to('cpu').numpy())
 
     object = o3d.geometry.PointCloud()

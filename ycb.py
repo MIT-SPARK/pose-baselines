@@ -9,7 +9,8 @@ from tqdm import tqdm
 # import pytorch3d
 import sys
 import torch
-from pytorch3d import transforms, ops
+# from pytorch3d import transforms, ops
+from scipy.spatial.transform import Rotation as Rot
 from utils_common import visualize_model_n_keypoints, visualize_torch_model_n_keypoints
 
 # DATASET_PATH: str = '../../data/ycb/models/ycb/'
@@ -125,7 +126,8 @@ class SE3PointCloudYCB(torch.utils.data.Dataset):
         t                   : torch.tensor of shape (3, 1)                  : translation
         """
 
-        R = transforms.random_rotation()
+        # R = transforms.random_rotation()
+        R = torch.from_numpy(Rot.random().as_matrix()).to(dtype=torch.float32)
         t = torch.rand(3, 1)
 
         model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)
@@ -227,7 +229,8 @@ class SE3PointCloudYCBAugment(torch.utils.data.Dataset):
         t                   : torch.tensor of shape (3, 1)                  : translation
         """
 
-        R = transforms.random_rotation()
+        R = torch.from_numpy(Rot.random().as_matrix()).to(dtype=torch.float32)
+        # R = transforms.random_rotation()
         t = torch.rand(3, 1)
 
         model_pcd = self.model_mesh.sample_points_uniformly(number_of_points=self.num_of_points)

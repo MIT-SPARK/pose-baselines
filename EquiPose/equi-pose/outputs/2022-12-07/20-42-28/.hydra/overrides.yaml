@@ -1,0 +1,6 @@
+- eval=True
+- dataset=modelnet40_partial
+- category=bottle
+- pretrained_dir=/model/modelnet40_partial/0.941r/
+- exp_num=0.941r
+- writer=True

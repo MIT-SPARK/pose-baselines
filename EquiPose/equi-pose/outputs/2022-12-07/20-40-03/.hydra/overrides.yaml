@@ -1,0 +1,6 @@
+- eval=True
+- dataset=modelnet40_complete
+- category=chair
+- pretrained_dir=/model/modelnet40_complete/0.8581/
+- exp_num=0.8581
+- writer=True

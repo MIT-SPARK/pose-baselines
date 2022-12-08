@@ -1,0 +1,6 @@
+- eval=True
+- dataset=modelnet40_partial
+- category=chair
+- ckpt=/model/modelnet40_complete/0.8591/checkpoints
+- exp_num=0.951r
+- writer=True

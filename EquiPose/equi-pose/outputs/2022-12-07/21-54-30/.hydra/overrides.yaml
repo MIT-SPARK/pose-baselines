@@ -1,0 +1,6 @@
+- eval=True
+- dataset=modelnet40_partial
+- category=sofa
+- exp_num=0.8591
+- training=complete_pcloud
+- writer=True

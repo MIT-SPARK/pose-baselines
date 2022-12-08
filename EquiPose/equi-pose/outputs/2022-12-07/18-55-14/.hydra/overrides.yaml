@@ -1,0 +1,5 @@
+- eval=True
+- dataset=
+- category=airplane
+- pretrained_dir=/model/modelnet40_complete/0.813/
+- writer=True

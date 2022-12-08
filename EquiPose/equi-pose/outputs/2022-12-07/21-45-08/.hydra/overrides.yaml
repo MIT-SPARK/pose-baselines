@@ -1,0 +1,5 @@
+- eval=True
+- dataset=modelnet40_partial
+- category=bottle
+- exp_num=0.941r
+- writer=True

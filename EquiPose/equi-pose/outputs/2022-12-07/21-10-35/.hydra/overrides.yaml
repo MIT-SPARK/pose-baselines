@@ -1,0 +1,7 @@
+- eval=True
+- dataset=modelnet40_complete
+- category=airplane
+- use_pretrain=True
+- ckpt=model/modelnet40_complete/0.813/checkpoints
+- exp_num=0.813
+- writer=True
