@@ -1,0 +1,6 @@
+- eval=True
+- new_dataset=shapenet.real.hard.airplane
+- dataset=modelnet40_partial
+- category=airplane
+- exp_num=0.913r
+- training=partial_pcloud

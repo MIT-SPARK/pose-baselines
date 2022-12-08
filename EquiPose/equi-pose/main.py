@@ -29,6 +29,7 @@ from utils_common import translation_error, rotation_error, adds_error
 from utils_common import EvalData
 from utils_common import analyze_registration_dataset, plot_cdf
 from utils_conversion import correctEquiPoseGT, equiposeDataToStandardForm, removeTranslationShapenet
+from utils_conversion import ChamferDistanceSqrt
 
 
 @hydra.main(config_path="configs", config_name="pose")
@@ -151,10 +152,10 @@ def main(cfg):
                     data = removeTranslationShapenet(data)
 
                 # breakpoint()
-                points = data['points'].squeeze(0).T
-                xyz = data['xyz'].squeeze(0).T
-                R_gt = data['R_gt'].squeeze(0)
-                t_gt = data['T'].squeeze(0).T
+                points = data['points'].squeeze(0).T.to(device)
+                xyz = data['xyz'].squeeze(0).T.to(device)
+                R_gt = data['R_gt'].squeeze(0).to(device)
+                t_gt = data['T'].squeeze(0).T.to(device)
 
                 torch.cuda.empty_cache()
 
@@ -163,8 +164,8 @@ def main(cfg):
                 data_cannon['xyz'] = data_cannon['points']
                 tr_agent.eval_func(data_cannon)
                 pose_info_cannon = tr_agent.pose_info
-                R_model = pose_info_cannon['r_pred'].squeeze(0).to('cpu')
-                t_model = pose_info_cannon['t_pred'].T.to('cpu')
+                R_model = pose_info_cannon['r_pred'].squeeze(0)
+                t_model = pose_info_cannon['t_pred'].T
 
                 # transformed_cannon = tr_agent.transformed_pts.squeeze(0).T.to('cpu')
                 # display_two_pcs(points, transformed_cannon)
@@ -172,8 +173,8 @@ def main(cfg):
                 # obtaining transformation: from implicit reconstruction, to input
                 tr_agent.eval_func(data)
                 pose_info = tr_agent.pose_info
-                R_cannon = pose_info['r_pred'].squeeze(0).to('cpu')
-                t_cannon = pose_info['t_pred'].T.to('cpu')
+                R_cannon = pose_info['r_pred'].squeeze(0)
+                t_cannon = pose_info['t_pred'].T
 
                 # transformed_cannon = tr_agent.transformed_pts.squeeze(0).T.to('cpu')
                 # display_two_pcs(xyz, transformed_cannon)
@@ -199,15 +200,18 @@ def main(cfg):
                 # print(tr_agent.pose_err)
                 points = points.to(device=R_est.device)
 
-                # adds_err_ = adds_error(points, T_gt, T_est)   #if pytorch3d is available
-                Z = (R_gt @ points) - (R_est @ points)
-                dist_ = torch.norm(Z, p=2, dim=0)
-                adds_err_ = torch.mean(dist_)       #TODO: this is an approximate ADD-S error.
+                chamfer_dist = ChamferDistanceSqrt()
+                # breakpoint()
+                X1 = R_gt @ points + t_gt
+                X2 = R_est @ points + t_est
+                adds_err_ = chamfer_dist(X1.T.unsqueeze(0).contiguous(), X2.T.unsqueeze(0).contiguous())
 
                 # breakpoint()
                 angle_error_list.append(r_err_.item())
                 trans_error_list.append(t_err_.item())
                 adds_error_list.append(adds_err_.item())
+
+                print("Our computed adds: ", adds_err_.item())
 
 
                 # pose_diff = tr_agent.pose_err
