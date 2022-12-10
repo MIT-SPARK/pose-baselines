@@ -81,6 +81,7 @@ def options(argv=None):
     # inspecting
     parser.add_argument('--writer', default=False, type=bool)
     parser.add_argument('--analyze_data', default=False, type=bool)
+    parser.add_argument('--final', default=False, type=bool)
 
     args = parser.parse_args(argv)
     return args

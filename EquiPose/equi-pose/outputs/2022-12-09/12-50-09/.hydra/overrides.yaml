@@ -1,0 +1,8 @@
+- eval=True
+- new_dataset=shapenet.sim.hard.bottle
+- dataset=modelnet40_complete
+- category=bottle
+- exp_num=0.8562
+- training=complete_pcloud
+- writer=True
+- final=True

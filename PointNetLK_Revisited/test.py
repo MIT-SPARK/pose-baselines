@@ -32,7 +32,12 @@ def test(args, testset, dptnetlk):
 
     # writer
     if args.writer is True:
-        writer = SummaryWriter()
+        if args.final:
+            log_dir = 'runs/' + str(args.dataset_type) + '.' + str(args.object)
+            writer = SummaryWriter(log_dir=log_dir)
+        else:
+            writer = SummaryWriter()
+
         args.outfile = str(writer.log_dir) + '/'
 
     else:

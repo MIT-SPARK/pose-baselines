@@ -57,3 +57,4 @@ viz: False
 new_dataset: ''
 analyze_data: False
 writer: False
+final: False

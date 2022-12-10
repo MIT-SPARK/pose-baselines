@@ -50,4 +50,5 @@ python -W ignore test.py \
 --dataset_type ycb.real \
 --object 006_mustard_bottle \
 --pretrained './runs/Nov28_05-53-37_spark-agent/_model_best.pth' \
---writer False
+--writer False \
+--final True

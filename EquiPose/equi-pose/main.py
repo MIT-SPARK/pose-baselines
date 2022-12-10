@@ -119,7 +119,11 @@ def main(cfg):
         return None
 
     if cfg.writer:
-        writer = SummaryWriter()
+        if cfg.final:
+            log_dir = 'runs/' + str(cfg.new_dataset)
+            writer = SummaryWriter(log_dir=log_dir)
+        else:
+            writer = SummaryWriter()
     else:
         writer = None
 
@@ -146,55 +150,78 @@ def main(cfg):
                 # BS = data['points'].shape[0]
                 # idx = data['idx']
 
-                if 'modelnet' in cfg.new_dataset:
+                if 'modelnet' in cfg.name_dset and 'shapenet' not in cfg.new_dataset:
                     data = correctEquiPoseGT(data)
+
+                    # breakpoint()
+                    points = data['points'].squeeze(0).T.to(device)
+                    xyz = data['xyz'].squeeze(0).T.to(device)
+                    R_gt = data['R_gt'].squeeze(0).to(device)
+                    t_gt = data['T'].squeeze(0).T.to(device)
+
+                    torch.cuda.empty_cache()
+
+                    # obtaining transformation: from implicit reconstruction, to input
+                    tr_agent.eval_func(data)
+                    pose_info = tr_agent.pose_info
+                    R_cannon = pose_info['r_pred'].squeeze(0)
+                    t_cannon = pose_info['t_pred'].T
+
+                    # transformed_cannon = tr_agent.transformed_pts.squeeze(0).T.to('cpu')
+                    # display_two_pcs(xyz, transformed_cannon)
+
+                    R_est = R_cannon
+                    t_est = t_cannon
+
                 elif 'shapenet' in cfg.new_dataset:
                     data = removeTranslationShapenet(data)
 
-                # breakpoint()
-                points = data['points'].squeeze(0).T.to(device)
-                xyz = data['xyz'].squeeze(0).T.to(device)
-                R_gt = data['R_gt'].squeeze(0).to(device)
-                t_gt = data['T'].squeeze(0).T.to(device)
+                    # breakpoint()
+                    points = data['points'].squeeze(0).T.to(device)
+                    xyz = data['xyz'].squeeze(0).T.to(device)
+                    R_gt = data['R_gt'].squeeze(0).to(device)
+                    t_gt = data['T'].squeeze(0).T.to(device)
 
-                torch.cuda.empty_cache()
+                    torch.cuda.empty_cache()
 
-                # obtaining the transformation: from implicit reconstruction, to cad model
-                data_cannon = data
-                data_cannon['xyz'] = data_cannon['points']
-                tr_agent.eval_func(data_cannon)
-                pose_info_cannon = tr_agent.pose_info
-                R_model = pose_info_cannon['r_pred'].squeeze(0)
-                t_model = pose_info_cannon['t_pred'].T
+                    # obtaining the transformation: from implicit reconstruction, to cad model
+                    data_cannon = data
+                    data_cannon['xyz'] = data_cannon['points']
+                    tr_agent.eval_func(data_cannon)
+                    pose_info_cannon = tr_agent.pose_info
+                    R_model = pose_info_cannon['r_pred'].squeeze(0)
+                    t_model = pose_info_cannon['t_pred'].T
 
-                # transformed_cannon = tr_agent.transformed_pts.squeeze(0).T.to('cpu')
-                # display_two_pcs(points, transformed_cannon)
+                    # transformed_cannon = tr_agent.transformed_pts.squeeze(0).T.to('cpu')
+                    # display_two_pcs(points, transformed_cannon)
 
-                # obtaining transformation: from implicit reconstruction, to input
-                tr_agent.eval_func(data)
-                pose_info = tr_agent.pose_info
-                R_cannon = pose_info['r_pred'].squeeze(0)
-                t_cannon = pose_info['t_pred'].T
+                    # obtaining transformation: from implicit reconstruction, to input
+                    tr_agent.eval_func(data)
+                    pose_info = tr_agent.pose_info
+                    R_cannon = pose_info['r_pred'].squeeze(0)
+                    t_cannon = pose_info['t_pred'].T
 
-                # transformed_cannon = tr_agent.transformed_pts.squeeze(0).T.to('cpu')
-                # display_two_pcs(xyz, transformed_cannon)
+                    # transformed_cannon = tr_agent.transformed_pts.squeeze(0).T.to('cpu')
+                    # display_two_pcs(xyz, transformed_cannon)
 
+                    R_est = R_cannon @ R_model.T
+                    t_est = t_cannon - R_est @ t_model
 
-                R_est = R_cannon @ R_model.T
-                t_est = t_cannon - R_est @ t_model
+                    # display_two_pcs(R_gt @ points + t_gt, xyz)
+                    # display_two_pcs(R_est @ points + t_est, xyz)
 
-                # display_two_pcs(R_gt @ points + t_gt, xyz)
-                # display_two_pcs(R_est @ points + t_est, xyz)
+                else:
+                    raise ValueError("Dataset Incorrectly Specified.")
 
                 # breakpoint()
                 r_err_ = rotation_error(R_gt, R_est)
                 t_err_ = translation_error(t_gt, t_est)
-                print("Our computed rerr: ", r_err_ * 180 / np.pi)
-                print("Their computed rerr: ", tr_agent.pose_err['rdiff'])
-                print("Our computed terr: ", t_err_)
-                print("Their computed terr: ", tr_agent.pose_err['tdiff'])
-                print("translation (GT): ", t_gt)
-                print("translation (EST): ", t_est)
+                # print("Our computed rerr: ", r_err_ * 180 / np.pi)
+                # print("Their computed rerr: ", tr_agent.pose_err['rdiff'])
+                # print("Our computed terr: ", t_err_)
+                # print("Their computed terr: ", tr_agent.pose_err['tdiff'])
+                # print("translation (GT): ", t_gt)
+                # print("translation (EST): ", t_est)
 
                 # checking their evaluation error
                 # print(tr_agent.pose_err)
@@ -211,7 +238,7 @@ def main(cfg):
                 trans_error_list.append(t_err_.item())
                 adds_error_list.append(adds_err_.item())
 
-                print("Our computed adds: ", adds_err_.item())
+                # print("Our computed adds: ", adds_err_.item())
 
 
                 # pose_diff = tr_agent.pose_err
@@ -259,7 +286,7 @@ def main(cfg):
         #     print('--saving to ', file_name)
         #     np.save(file_name, arr={'info': infos_dict, 'err': track_dict})
 
-        breakpoint()
+        # breakpoint()
         # save evaluated data
         if writer is not None:
             writer.add_histogram('test/rotation_err', torch.tensor(angle_error_list), bins=100)

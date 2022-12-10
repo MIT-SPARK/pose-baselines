@@ -1,0 +1,8 @@
+- eval=True
+- new_dataset=shapenet.sim.hard.chair
+- dataset=modelnet40_complete
+- category=chair
+- exp_num=0.8581
+- training=complete_pcloud
+- writer=True
+- final=True

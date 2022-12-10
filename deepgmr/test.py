@@ -117,6 +117,7 @@ if __name__ == "__main__":
     parser.add_argument('--analyze_data', type=bool, default=False)
     parser.add_argument('--object', type=str, default='all')  # could be 'all' or any shapenet object class name
     parser.add_argument('--shapenet_ds_len', type=int, default=512) # for shapenet objects' dataset
+    parser.add_argument('--final', type=bool, default=False)
     # c3po evaluation
     # parser.add_argument('--eval_normalize', type=bool, default=True)
     # parser.add_argument('--eval_adds_threshold', type=float, default=0.02)
@@ -166,7 +167,11 @@ if __name__ == "__main__":
         df.to_csv(filename)
 
     else:
-        writer = SummaryWriter()
+
+        if args.final:
+            log_dir = "runs/" + str(args.type) + '.' + str(args.object)
+
+        writer = SummaryWriter(log_dir=log_dir)
         args.log_dir = writer.logdir
         args.results_dir = writer.logdir
 

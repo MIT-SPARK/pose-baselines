@@ -319,6 +319,9 @@ def get_auc(rec, threshold):
 
     rec = np.sort(rec)
     rec = np.where(rec <= threshold, rec, np.array([float("inf")]))
+    # print(rec)
+    # print(rec.shape)
+    # breakpoint()
 
     n = rec.shape[0]
     prec = np.cumsum(np.ones(n) / n, axis=0)
@@ -326,31 +329,38 @@ def get_auc(rec, threshold):
     index = np.isfinite(rec)
     rec = rec[index]
     prec = prec[index]
-    # print(prec)
-    # print(prec.shape)
-    mrec = np.zeros(rec.shape[0] + 2)
-    mrec[0] = 0
-    mrec[-1] = threshold
-    mrec[1:-1] = rec
 
-    mpre = np.zeros(prec.shape[0] + 2)
-    mpre[1:-1] = prec
-    mpre[-1] = prec[-1]
+    if len(rec) == 0:
+        # print("returns zero: ", 0.0)
+        return np.asarray([0.0])[0]
+    else:
+        # print(prec)
+        # print(prec.shape)
+        mrec = np.zeros(rec.shape[0] + 2)
+        mrec[0] = 0
+        mrec[-1] = threshold
+        mrec[1:-1] = rec
 
-    for i in range(1, mpre.shape[0]):
-        mpre[i] = max(mpre[i], mpre[i - 1])
+        mpre = np.zeros(prec.shape[0] + 2)
+        mpre[1:-1] = prec
+        mpre[-1] = prec[-1]
 
-    ap = 0
-    ap = np.zeros(1)
-    for i in range(mrec.shape[0] - 1):
-        # print("mrec[i+1] ", mrec[i+1])
-        # print("mpre[i+1] ", mpre[i+1])
-        # ap += (mrec[i+1] - mrec[i]) * mpre[i+1]
-        ap += (mrec[i + 1] - mrec[i]) * mpre[i + 1] * (1 / threshold)
+        for i in range(1, mpre.shape[0]):
+            mpre[i] = max(mpre[i], mpre[i - 1])
 
-    # print(ap)
-    # print(type(ap))
-    return ap[0]
+        ap = 0
+        ap = np.zeros(1)
+        for i in range(mrec.shape[0] - 1):
+            # print("mrec[i+1] ", mrec[i+1])
+            # print("mpre[i+1] ", mpre[i+1])
+            # ap += (mrec[i+1] - mrec[i]) * mpre[i+1]
+            ap += (mrec[i + 1] - mrec[i]) * mpre[i + 1] * (1 / threshold)
+
+        # print(ap)
+        # print(type(ap))
+        # print("returns ap: ", ap[0])
+        # breakpoint()
+        return ap[0]
 
 
 class EvalData:

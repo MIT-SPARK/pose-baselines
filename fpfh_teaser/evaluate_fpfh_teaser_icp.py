@@ -13,10 +13,15 @@ from utils_common import adds_error, rotation_error, translation_error
 from utils_common import EvalData
 
 
-def evaluate(dataset_name, object, visualize=False):
+def evaluate(dataset_name, object, visualize=False, args=None):
 
     device = 'cpu'
-    writer = SummaryWriter()
+    if args.final:
+        log_dir = 'runs/' + dataset_name + '.' + object
+        writer = SummaryWriter(log_dir=log_dir)
+    else:
+        writer = SummaryWriter()
+
     savedir = str(writer.log_dir) + '/'
 
     if dataset_name.split('.')[0] == 'shapenet':
@@ -124,10 +129,11 @@ if __name__ == "__main__":
                                  'shapenet.real.easy', 'shapenet.real.medium', 'shapenet.real.hard'],
                         help="Dataset name",
                         type=str)
+    parser.add_argument('--final', type=bool, default=False)
     args = parser.parse_args()
 
     # class name: object category in shapenet
     object = args.object
     dataset_name = args.dataset
 
-    evaluate(dataset_name=dataset_name, object=object, visualize=False)
+    evaluate(dataset_name=dataset_name, object=object, visualize=False, args=args)

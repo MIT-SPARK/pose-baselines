@@ -39,4 +39,5 @@ python test.py --type shapenet.real.hard \
 python test.py --type ycb.real \
 --checkpoint "models/modelnet_noisy.pth" \
 --use_rri \
---object 006_mustard_bottle
+--object 006_mustard_bottle \
+--final True

@@ -1,0 +1,115 @@
+seed: 2913
+exp_num: 0.961r
+task: ssl_partial_pcloud_pose_completion
+category: sofa
+arch_type: ae
+encoder_type: enc_so3net
+decoder_type: fc
+log_dir: /model/${name_dset}/${exp_num}
+no_cuda: false
+gpu: '0'
+num_workers: 8
+device: ''
+use_fps_points: false
+batch_size: 1
+test_batch: 1
+in_points: 1024
+out_points: 1024
+normalize_scale: false
+use_rgb: false
+eval: true
+iteration: 0
+pre_compute_delta: false
+use_pretrain: false
+ckpt: ''
+save: false
+is_debug: false
+vis: true
+save_frequency: 10
+save_step_frequency: 1000
+val_frequency: 10
+eval_frequency: 1000
+vis_frequency: 1000
+verbose: false
+use_wandb: false
+save_fig: false
+show_fig: false
+viz: false
+new_dataset: shapenet.real.easy.sofa
+analyze_data: false
+writer: true
+t_method_type: 0
+r_method_type: 1
+pred_t: true
+pred_s: false
+nr_epochs: 500
+lr: 0.0005
+lr_decay: 0.9995
+latent_dim: 128
+dec_features: (256, 256)
+nocs_features:
+- 128
+- 128
+- 3
+- sigmoid
+seg_features:
+- 128
+- 128
+- 2
+- softmax
+confi_features:
+- 128
+- 1
+- sigmoid
+mode_features:
+- softmax
+rotation_loss_type: 1
+use_objective_T: false
+use_objective_R: false
+use_objective_M: false
+use_confidence_R: false
+use_objective_canon: false
+confidence_loss_multiplier: 0.01
+consistency_loss_multiplier: 0.1
+use_symmetry_loss: false
+model:
+  model: enc_so3net
+  input_num: 1024
+  output_num: 32
+  search_radius: 0.4
+  normalize_input: false
+  dropout_rate: 0.0
+  init_method: xavier
+  kpconv: false
+  kanchor: 60
+  normals: false
+  flag: rotation
+  representation: quat
+  pooling_method: max
+MODEL:
+  num_in_channels: 1
+  num_mid_channels: 1
+  num_channels_R: 1
+train_lr:
+  init_lr: 0.001
+  lr_type: exp_decay
+  decay_rate: 0.5
+  decay_step: 10000
+train_loss:
+  loss_type: soft
+  attention_loss_type: no_reg
+  margin: 1.0
+  temperature: 3
+  attention_margin: 1.0
+  attention_pretrain_step: 3000
+  equi_alpha: 0.0
+  eval: false
+name_dset: modelnet40_partial
+augment: false
+DATASET:
+  dataset_path: /data/modelnet40_partial/
+  instance_ratio: 1.0
+  viewpoint_ratio: 1.0
+  add_noise: false
+  noise_trans: 0.04
+  workers: 8

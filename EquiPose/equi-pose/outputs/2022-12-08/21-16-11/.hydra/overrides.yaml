@@ -1,0 +1,7 @@
+- eval=True
+- new_dataset=shapenet.real.medium.sofa
+- dataset=modelnet40_partial
+- category=sofa
+- exp_num=0.961r
+- training=partial_pcloud
+- writer=True
