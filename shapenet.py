@@ -678,7 +678,7 @@ class ShapeNet(torch.utils.data.Dataset):
 
     def _get_cad_models(self):
 
-        return self.ds_.cad_model
+        return self.ds_.cad_models
 
     def _get_model_keypoints(self):
 
