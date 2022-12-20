@@ -8,22 +8,51 @@ from utils_common import EvalData
 from shapenet import OBJECT_CATEGORIES as shapenet_objects
 from ycb import OBJECT_CATEGORIES as ycb_objects
 
-datasets = ["shapenet.real.hard", "ycb.real"]
 
-baselines = ["deepgmr",
-             "equipose",
-             "fpfh",
-             "pointnetlk"]
+shapenet_datasets =["shapenet.sim.easy", "shapenet.sim.hard", "shapenet.real.hard"]
+ycb_datasets = ["ycb.sim", "ycb.real"]
 
-baseline_folders = ["deepgmr/runs",
-                    "EquiPose/equi-pose/runs",
-                    "fpfh_teaser/runs",
-                    "PointNetLK_Revisited/runs"]
+datasets = shapenet_datasets + ycb_datasets
 
+baselines_default = ["KeyPoSim",
+                     "KeyPoSimICP",
+                     #"KeyPoSimRANSACICP",
+                     "KeyPoSimCor",
+                     "KeyPoSimCorICP",
+                     #"KeyPoSimCorRANSACICP",
+                     "c3po",
+                     "KeyPoReal"]
+baselines_new = ["deepgmr",
+                 "equipose",
+                 "fpfh",
+                 "pointnetlk"]
+baselines = baselines_new + baselines_default
+
+baseline_folders = {"deepgmr": "deepgmr/runs",
+                    "equipose": "EquiPose/equi-pose/runs",
+                    "fpfh": "fpfh_teaser/runs",
+                    "pointnetlk": "PointNetLK_Revisited/runs"}
+
+baseline_display_name = {
+             "KeyPoSim": "KeyPo (sim)",
+             "KeyPoSimICP": "KeyPo (sim) + ICP",
+             "KeyPoSimRANSACICP": "KeyPo (sim) + RANSAC + ICP",
+             "KeyPoSimCor": "KeyPo (sim) + Corr.",
+             "KeyPoSimCorICP": "KeyPo (sim) + Corr. + ICP",
+             "KeyPoSimCorRANSACICP": "KeyPo (sim) + Corr. + RANSAC + ICP",
+             "c3po": "C-3PO",
+             "KeyPoReal": "KeyPo (real)",
+             "deepgmr": "DeepGMR",
+             "equipose": "EquiPose",
+             "fpfh": "FPFH + TEASER++",
+             "pointnetlk": "PointNetLK"
+}
+
+sim_omit_methods = ["c3po", "KeyPoReal"]
 
 dd_dataset = widgets.Dropdown(
-    options=["shapenet", "ycb"],
-    value="shapenet",
+    options=datasets,
+    value=datasets[0],
     description="Dataset"
 )
 
@@ -40,54 +69,99 @@ dd_metric = widgets.Dropdown(
     description="Metric"
 )
 
+slide_adds_th = widgets.FloatSlider(
+    min=0.01,
+    max=0.20,
+    step=0.005,
+    value=0.05,
+    description="ADD-S Threshold"
+)
 
-def extract_data(my_files, my_labels):
+slide_adds_auc_th = widgets.FloatSlider(
+    min=0.01,
+    max=0.20,
+    step=0.005,
+    value=0.10,
+    description="ADD-S AUC Threshold"
+)
 
-    labels = my_labels
+
+def extract_data(my_files, my_labels, my_adds_th=0.05, my_adds_auc_th=0.10):
+
+    labels = []
     data = dict()
 
-    for i, label in enumerate(labels):
+    for i, label in enumerate(my_labels):
         eval_data = EvalData()
 
         # print("label: ", label)
         # print("loading file: ", my_files[i])
         eval_data.load(my_files[i])
+        eval_data.set_adds_th(my_adds_th)
+        eval_data.set_adds_auc_th(my_adds_auc_th)
 
         #     print(eval_data.data["adds"])
         eval_data.complete_eval_data()
         data[label] = eval_data.data
+        labels.append(label)
+
+        if label == baseline_display_name["c3po"]:
+
+            eval_data_oc = eval_data.compute_oc()
+            eval_data_oc_nd = eval_data.compute_ocnd()
+            label_oc = label + " (oc)"
+            label_oc_nd = label + " (oc+nd)"
+
+            data[label_oc] = eval_data_oc.data
+            data[label_oc_nd] = eval_data_oc_nd.data
+
+            labels.append(label_oc)
+            labels.append(label_oc_nd)
 
     return data
 
 
-def table(my_dataset, my_object):
+def table(my_dataset, my_object, my_adds_th, my_adds_auc_th):
 
     #
-    if my_dataset == "shapenet":
-        my_dataset = "shapenet.real.hard"
-
+    if "shapenet" in my_dataset:
+        # my_dataset = "shapenet.real.hard"
+        base_folder = "c3po/expt_shapenet"
         assert my_object in shapenet_objects
 
-    elif my_dataset == "ycb":
-        my_dataset = "ycb.real"
-
+    elif "ycb" in my_dataset:
+        # my_dataset = "ycb.real"
+        base_folder = "c3po/expt_ycb"
         assert my_object in ycb_objects
 
     else:
         raise ValueError("my_dataset not specified correctly.")
 
     #
-    my_baselines = []
-    my_files = []
-
-    for baseline, folder in zip(baselines, baseline_folders):
-        _filename = folder + '/' + my_dataset + '.' + my_object + '/eval_data.pkl'
-        if os.path.isfile(_filename):
-            my_baselines.append(baseline)
-            my_files.append(_filename)
+    if "sim" in my_dataset:
+        baselines_to_plot = [x for x in baselines if x not in sim_omit_methods]
+    else:
+        baselines_to_plot = baselines
 
     #
-    data = extract_data(my_files, my_baselines)
+    my_baselines = []
+    my_files = []
+    for baseline in baselines_to_plot:
+        if baseline in baselines_new:
+            folder = baseline_folders[baseline]
+            _filename = folder + '/' + my_dataset + '.' + my_object + '/eval_data.pkl'
+        elif baseline in baselines_default:
+            _filename = base_folder + '/eval/' + baseline + '/' + "point_transformer" + '/' + my_dataset + '/' \
+                        + my_object + '/eval_data.pkl'
+
+        if os.path.isfile(_filename):
+            my_baselines.append(baseline_display_name[baseline])
+            my_files.append(_filename)
+        # else:
+        #     print(_filename)
+
+    #
+    data = extract_data(my_files, my_baselines, my_adds_th, my_adds_auc_th)
 
     #
     df = pd.DataFrame(data, index=["adds_th_score", "adds_auc"])
@@ -100,30 +174,41 @@ def table(my_dataset, my_object):
 def plot(my_dataset, my_object, my_metric):
 
     #
-    if my_dataset == "shapenet":
-        my_dataset = "shapenet.real.hard"
-
+    if "shapenet" in my_dataset:
+        # my_dataset = "shapenet.real.hard"
+        base_folder = "c3po/expt_shapenet"
         assert my_object in shapenet_objects
 
-    elif my_dataset == "ycb":
-        my_dataset = "ycb.real"
-
+    elif "ycb" in my_dataset:
+        # my_dataset = "ycb.real"
+        base_folder = "c3po/expt_ycb"
         assert my_object in ycb_objects
 
     else:
         raise ValueError("my_dataset not specified correctly.")
 
-    assert my_metric in ["adds", "rerr", "terr"]
+    #
+    if "sim" in my_dataset:
+        baselines_to_plot = [x for x in baselines if x not in sim_omit_methods]
+    else:
+        baselines_to_plot = baselines
 
     #
     my_baselines = []
     my_files = []
+    for baseline in baselines_to_plot:
+        if baseline in baselines_new:
+            folder = baseline_folders[baseline]
+            _filename = folder + '/' + my_dataset + '.' + my_object + '/eval_data.pkl'
+        elif baseline in baselines_default:
+            _filename = base_folder + '/eval/' + baseline + '/' + "point_transformer" + '/' + my_dataset + '/' \
+                        + my_object + '/eval_data.pkl'
 
-    for baseline, folder in zip(baselines, baseline_folders):
-        _filename = folder + '/' + my_dataset + '.' + my_object + '/eval_data.pkl'
         if os.path.isfile(_filename):
-            my_baselines.append(baseline)
+            my_baselines.append(baseline_display_name[baseline])
             my_files.append(_filename)
+        # else:
+        #     print(_filename)
 
     #
     data = extract_data(my_files, my_baselines)
@@ -136,6 +221,82 @@ def plot(my_dataset, my_object, my_metric):
         plot_terr(data)
     else:
         raise ValueError("my_metric not correctly specified.")
+
+    return None
+
+
+def table_certifiable(my_dataset, my_object, my_detector="point_transformer"):
+    #
+    if "shapenet" in my_dataset:
+        # if my_dataset == "shapenet":
+        base_folder = "c3po/expt_shapenet"
+
+        if my_object not in shapenet_objects:
+            print("Error: Specified Object not in the Dataset.")
+            return None
+
+    elif "ycb" in my_dataset:
+        # elif my_dataset == "ycb":
+        base_folder = "c3po/expt_ycb"
+
+        if my_object not in ycb_objects:
+            print("Error: Specified Object not in the Dataset.")
+            return None
+
+        if my_detector != "point_transformer":
+            print("Error: We only trained Point Transformer on YCB, as PointNet showed "
+                  "suboptimal performance on ShapeNet.")
+            return None
+
+    else:
+        raise ValueError("my_dataset not specified correctly.")
+
+    #
+    # if "sim" in my_dataset:
+    #     baselines_to_plot = [x for x in baselines if x not in sim_omit_methods]
+    # else:
+    #     baselines_to_plot = baselines
+    baselines_to_plot = ['c3po']
+
+    #
+    if "real" not in my_dataset:
+        print("Error: this table is only available for C-3PO on shapenet.real.hard or ycb.real")
+        return None
+
+    #
+    my_baselines = []
+    my_files = []
+
+    for baseline in baselines_to_plot:
+        _filename = base_folder + '/eval/' + baseline + '/' + my_detector + '/' + my_dataset + '/' \
+                    + my_object + '/eval_data.pkl'
+
+        if os.path.isfile(_filename):
+            my_baselines.append(baseline_display_name[baseline])
+            my_files.append(_filename)
+
+        # else:
+        #     print(_filename)
+
+    #
+    data = extract_data(my_files, my_baselines)
+
+    oc = data[baseline_display_name['c3po']]['oc']
+    nd = data[baseline_display_name['c3po']]['nd']
+    oc_nd = oc * nd
+
+    percent_all = 100
+    percent_oc = 100 * oc.sum() / len(oc)
+    percent_oc_nd = 100 * oc_nd.sum() / len(oc_nd)
+
+    table_data = dict()
+    table_data['all'] = {'percent': percent_all}
+    table_data['oc'] = {'percent': percent_oc}
+    table_data['oc + nd'] = {'percent': percent_oc_nd}
+
+    df = pd.DataFrame(table_data, index=["percent"])
+    df = df.transpose()
+    display(df)
 
     return None
 
@@ -186,8 +347,6 @@ def plot_terr(data):
     plt.xlabel('Translation Error')
 
     return None
-
-
 
 
 
