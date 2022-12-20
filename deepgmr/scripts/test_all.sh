@@ -28,17 +28,17 @@ do
 done
 
 
-for object_ in $OBJECTS_SHAPENET
-do
-  echo $object_
-
-  python test.py --type shapenet.real.easy \
-  --checkpoint $MODEL_FILE \
-  --use_rri \
-  --object $object_ \
-  --final True
-
-done
+#for object_ in $OBJECTS_SHAPENET
+#do
+#  echo $object_
+#
+#  python test.py --type shapenet.real.easy \
+#  --checkpoint $MODEL_FILE \
+#  --use_rri \
+#  --object $object_ \
+#  --final True
+#
+#done
 
 for object_ in $OBJECTS_SHAPENET
 do

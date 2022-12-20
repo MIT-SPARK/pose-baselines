@@ -57,7 +57,11 @@ class ShapeNetDataset(torch.utils.data.Dataset):
                 self.data_ = pickle.load(f)
 
         else:
-            self.ds = shapenet.ShapeNet(type=type, object=args.object, length=args.shapenet_ds_len,
+            if args.object == 'all':
+                object_ = 'airplane'
+            else:
+                object_ = args.object
+            self.ds = shapenet.ShapeNet(type=type, object=object_, length=args.shapenet_ds_len,
                                         num_points=args.n_points, adv_option=adv_option)
 
     def __len__(self):
@@ -80,8 +84,8 @@ class ShapeNetDataset(torch.utils.data.Dataset):
         xyz0 = np.ascontiguousarray(xyz0)
         xyz1 = np.ascontiguousarray(xyz1)
 
-        xyz0 = jitter_pcd(xyz0)
-        xyz1 = jitter_pcd(xyz1)
+        # xyz0 = jitter_pcd(xyz0)
+        # xyz1 = jitter_pcd(xyz1)
 
         # breakpoint()
         trans = torch.eye(4)

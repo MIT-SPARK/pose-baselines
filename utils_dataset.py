@@ -220,3 +220,31 @@ class PointRegistrationMedium(torch.utils.data.Dataset):
         t /= np.linalg.norm(t)
         t *= np.random.rand() * self.max_dist
         return torch.from_numpy(np.expand_dims(t, 1))
+
+
+class fromFormat(torch.utils.data.Dataset):
+    def __init__(self, dataset):
+        self.ds = dataset
+        self.cad_models = self.ds._get_cad_models()
+        self.model_keypoints = self.ds._get_model_keypoints()
+
+    def __len__(self):
+
+        return len(self.ds)
+
+    def __getitem__(self, item):
+
+        pc2, kp2, R, t = self.ds[item]
+
+        pc1 = self.cad_models.squeeze(0)
+        kp1 = self.model_keypoints.squeeze(0)
+
+        return pc1, pc2, kp1, kp2, R, t
+
+    def _get_cad_models(self):
+
+        return self.ds._get_cad_models()
+
+    def _get_model_keypoints(self):
+
+        return self.ds._get_model_keypoints()

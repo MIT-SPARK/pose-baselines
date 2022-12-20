@@ -132,6 +132,7 @@ if __name__ == "__main__":
     if torch.cuda.is_available():
         model.cuda()
 
+    # breakpoint()
     if args.type.split('.')[0] == 'deepgmr':
         test_data = TestData(args.data_file, args)
 
@@ -154,8 +155,8 @@ if __name__ == "__main__":
                                                   ds_name=args.type,
                                                   transform=deepgmrDataToStandardFormat())
 
-        plot_cdf(data=rerr, label="rotation", filename=str(args.type) + "rerr_test")
-        plot_cdf(data=terr, label="translation", filename=str(args.type) + "terr_test")
+        plot_cdf(data=rerr, label="rotation", filename='./data_analysis/' + str(args.type) + "rerr_test")
+        plot_cdf(data=terr, label="translation", filename='./data_analysis/' + str(args.type) + "terr_test")
 
         # saving
         data_ = dict()

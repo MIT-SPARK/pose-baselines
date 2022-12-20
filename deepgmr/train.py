@@ -197,7 +197,7 @@ if __name__ == "__main__":
         # data = ShapeNetDataset(args=args, type=type)
 
         filename = 'data/train/' + str(args.type) + '.pkl'
-        data = ShapeNetDataset(args=args, type=type, from_file=True,
+        data = ShapeNetDataset(args=args, type=type, from_file=False,
                                filename=filename,
                                adv_option=adv_options)
 
@@ -213,8 +213,8 @@ if __name__ == "__main__":
                                                   ds_name=args.type,
                                                   transform=deepgmrDataToStandardFormat())
 
-        plot_cdf(data=rerr, label="rotation", filename=str(args.type) + "rerr_test")
-        plot_cdf(data=terr, label="translation", filename=str(args.type) + "terr_test")
+        plot_cdf(data=rerr, label="rotation", filename='./data_analysis/' + str(args.type) + "rerr_test")
+        plot_cdf(data=terr, label="translation", filename='./data_analysis/' + str(args.type) + "terr_test")
 
         # saving
         data_ = dict()
