@@ -127,12 +127,18 @@ def table(my_dataset, my_object, my_adds_th, my_adds_auc_th):
     if "shapenet" in my_dataset:
         # my_dataset = "shapenet.real.hard"
         base_folder = "c3po/expt_shapenet"
-        assert my_object in shapenet_objects
+
+        if my_object not in shapenet_objects:
+            print("Error: Specified Object not in the Dataset.")
+            return None
 
     elif "ycb" in my_dataset:
         # my_dataset = "ycb.real"
         base_folder = "c3po/expt_ycb"
-        assert my_object in ycb_objects
+
+        if my_object not in ycb_objects:
+            print("Error: Specified Object not in the Dataset.")
+            return None
 
     else:
         raise ValueError("my_dataset not specified correctly.")
@@ -177,12 +183,18 @@ def plot(my_dataset, my_object, my_metric):
     if "shapenet" in my_dataset:
         # my_dataset = "shapenet.real.hard"
         base_folder = "c3po/expt_shapenet"
-        assert my_object in shapenet_objects
+
+        if my_object not in shapenet_objects:
+            print("Error: Specified Object not in the Dataset.")
+            return None
 
     elif "ycb" in my_dataset:
         # my_dataset = "ycb.real"
         base_folder = "c3po/expt_ycb"
-        assert my_object in ycb_objects
+
+        if my_object not in ycb_objects:
+            print("Error: Specified Object not in the Dataset.")
+            return None
 
     else:
         raise ValueError("my_dataset not specified correctly.")
@@ -225,7 +237,10 @@ def plot(my_dataset, my_object, my_metric):
     return None
 
 
-def table_certifiable(my_dataset, my_object, my_detector="point_transformer"):
+def table_certifiable(my_dataset, my_object):
+
+    my_detector = "point_transformer"
+
     #
     if "shapenet" in my_dataset:
         # if my_dataset == "shapenet":
