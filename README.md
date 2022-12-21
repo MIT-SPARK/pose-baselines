@@ -2,7 +2,14 @@
 Author: Rajat Talak
 
 We evaluate various methods of estimating object pose, given partial object point cloud and 
-the object CAD model. 
+the object CAD model. We compare various methods in the literature, namely,
+[TEASER++](https://github.com/MIT-SPARK/TEASER-plusplus),
+[DeepGMR](https://github.com/wentaoyuan/deepgmr),
+[PointNetLK](https://github.com/Lilac-Lee/PointNetLK_Revisited),
+[EquiPose](https://github.com/dragonlong/equi-pose),
+and several
+semantic keypoint-based methods used in [C-3PO](https://github.com/MIT-SPARK/C-3PO). 
+We would like to thank the Authors of these repos, as we use their implementation and training setup, to generate results.
 
 
 ## Visualizing the Results 
@@ -202,7 +209,7 @@ If you find this project useful, do cite our work:
 
 
 ## License
-Our C-3PO project is released under MIT license.
+This project is released under MIT license.
 
 
 ## Acknowledgement
