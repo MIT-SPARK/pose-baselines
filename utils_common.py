@@ -11,7 +11,7 @@ import seaborn as sns
 import pickle5 as pickle
 # import pickle
 import matplotlib.pyplot as plt
-# from pytorch3d import ops
+from pytorch3d import ops
 
 
 def translation_error(t, t_):
