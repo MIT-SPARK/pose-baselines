@@ -34,8 +34,7 @@ jupyter notebook
 ```
 Open results.ipynb and run. You should see the following:
 
-
-
+![preview](docs/pd-results.gif) 
 
 
 
@@ -177,7 +176,10 @@ pip install -r new_requirements.txt
 bash build.sh
 pip install tensorboard
 ```
-or install the environment as specified in pose-baselines/EquiPose/equi=pose/README.md
+or install the environment as specified in pose-baselines/EquiPose/equi=pose/README.md. 
+
+Download the pre-trained models [drive_link](https://drive.google.com/drive/folders/1i8EvIugHF8kmk-sgpzAhiQM2a4p1R7cu) 
+provided by [EquiPose](https://github.com/dragonlong/equi-pose). Add them to the folder: pose-baselines/EquiPose/logs/model/
 
 Run evaluations:
 ```bash
