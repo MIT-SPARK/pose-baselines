@@ -30,18 +30,18 @@ do
 done
 
 
-for object_ in $OBJECTS_SHAPENET
-do
-  echo $object_
-
-  python -W ignore test.py \
-  --dataset_type shapenet.real.easy \
-  --object $object_ \
-  --pretrained $MODEL_NAME \
-  --writer True \
-  --final True
-
-done
+#for object_ in $OBJECTS_SHAPENET
+#do
+#  echo $object_
+#
+#  python -W ignore test.py \
+#  --dataset_type shapenet.real.easy \
+#  --object $object_ \
+#  --pretrained $MODEL_NAME \
+#  --writer True \
+#  --final True
+#
+#done
 
 for object_ in $OBJECTS_SHAPENET
 do
