@@ -1,7 +1,0 @@
-- eval=True
-- new_dataset=shapenet.sim.hard.airplane
-- dataset=modelnet40_complete
-- category=airplane
-- exp_num=0.813
-- training=complete_pcloud
-- writer=True

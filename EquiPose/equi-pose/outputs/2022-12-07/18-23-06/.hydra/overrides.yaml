@@ -1,7 +1,0 @@
-- exp_num=0.813
-- training=complete_pcloud
-- dataset=modelnet40_complete
-- category=airplane
-- eval=True
-- pretrained_dir=/model/modelnet40_complete/0.813/
-- writer=True

@@ -1,4 +1,4 @@
-name: deepgmrv3
+name: deepgmr
 channels:
   - pytorch
   - defaults

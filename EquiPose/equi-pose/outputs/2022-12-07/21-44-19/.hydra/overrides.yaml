@@ -1,5 +1,0 @@
-- eval=True
-- dataset=modelnet40_partial
-- category=sofa
-- exp_num=0.961r
-- writer=True

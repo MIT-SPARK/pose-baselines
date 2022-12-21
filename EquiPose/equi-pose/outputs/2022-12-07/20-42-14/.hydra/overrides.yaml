@@ -1,6 +1,0 @@
-- eval=True
-- dataset=modelnet40_partial
-- category=airplane
-- pretrained_dir=/model/modelnet40_partial/0.913r/
-- exp_num=0.913r
-- writer=True

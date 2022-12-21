@@ -1,6 +1,0 @@
-- eval=True
-- dataset=modelnet40_partial
-- category=car
-- pretrained_dir=/model/modelnet40_partial/0.921r/
-- exp_num=0.921r
-- writer=True

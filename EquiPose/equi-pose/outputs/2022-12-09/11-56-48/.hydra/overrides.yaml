@@ -1,8 +1,0 @@
-- eval=True
-- new_dataset=shapenet.real.hard.chair
-- dataset=modelnet40_partial
-- category=chair
-- exp_num=0.951r
-- training=partial_pcloud
-- writer=True
-- final=True

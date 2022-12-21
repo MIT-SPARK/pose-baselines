@@ -1,7 +1,0 @@
-- exp_num=0.001
-- training=complete_pcloud
-- dataset=shapenet.depth
-- category=airplane
-- use_wandb=False
-- nr_epochs=10
-- save_frequency=1

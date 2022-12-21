@@ -1,6 +1,0 @@
-- eval=True
-- dataset=modelnet40_complete
-- category=car
-- exp_num=0.851
-- training=complete_pcloud
-- writer=True

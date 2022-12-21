@@ -1,8 +1,0 @@
-- eval=True
-- new_dataset=shapenet.real.easy.car
-- dataset=modelnet40_partial
-- category=car
-- exp_num=0.921r
-- training=partial_pcloud
-- writer=True
-- final=True

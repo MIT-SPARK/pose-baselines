@@ -1,7 +1,0 @@
-- eval=True
-- dataset=modelnet40_partial
-- category=airplane
-- use_pretrain=True
-- ckpt=logs/model/modelnet40_partial/0.913r/checkpoints
-- exp_num=0.913r
-- writer=True

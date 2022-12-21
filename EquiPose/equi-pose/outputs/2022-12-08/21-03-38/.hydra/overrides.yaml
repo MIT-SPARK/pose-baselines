@@ -1,7 +1,0 @@
-- eval=True
-- new_dataset=shapenet.real.easy.bottle
-- dataset=modelnet40_partial
-- category=bottle
-- exp_num=0.941r
-- training=partial_pcloud
-- writer=True

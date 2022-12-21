@@ -1,6 +1,0 @@
-- eval=True
-- dataset=modelnet40_complete
-- category=sofa
-- pretrained_dir=/model/modelnet40_complete/0.8591/
-- exp_num=0.8591
-- writer=True

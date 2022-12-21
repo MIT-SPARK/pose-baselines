@@ -1,6 +1,0 @@
-- eval=True
-- dataset=modelnet40_partial
-- training=partial_pcloud
-- category=airplane
-- exp_num=0.913r
-- writer=True

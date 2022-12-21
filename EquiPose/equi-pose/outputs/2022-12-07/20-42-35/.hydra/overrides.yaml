@@ -1,6 +1,0 @@
-- eval=True
-- dataset=modelnet40_partial
-- category=chair
-- pretrained_dir=/model/modelnet40_partial/0.951r/
-- exp_num=0.951r
-- writer=True

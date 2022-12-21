@@ -1,5 +1,0 @@
-- eval=True
-- dataset=modelnet40_partial
-- category=chair
-- exp_num=0.951r
-- writer=True

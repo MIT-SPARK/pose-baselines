@@ -1,6 +1,0 @@
-- exp_num=0.813
-- training=complete_pcloud
-- dataset=shapenet_full
-- category=airplane
-- eval=True
-- save=True

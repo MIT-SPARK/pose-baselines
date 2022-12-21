@@ -1,5 +1,0 @@
-- exp_num=1.001
-- training=complete_pcloud
-- dataset=modelnet40_complete
-- category=airplane
-- use_wandb=True
