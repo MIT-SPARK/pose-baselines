@@ -81,14 +81,9 @@ Move the KeypointNet and learning-objects folders in data_shapenet and ycb folde
 
 Install conda environment:
 ```bash
-conda create --name fpfh python=3.9
-conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch -c nvidia
-conda install pip
-pip install open3d
-pip install "git+https://github.com/facebookresearch/pytorch3d.git@stable"
-pip install tensorboard
-pip install seaborn
-pip install pickle5
+cd fpfh_teaser
+conda env create -f environment.yml
+conda activate pb-fpfh
 ```
 
 Install TEASER++ by following the instructions in [TEASER++](https://github.com/MIT-SPARK/TEASER-plusplus). 
@@ -105,17 +100,15 @@ conda activate fpfh
 cd TEASER-plusplus
 
 cd TEASER-plusplus && mkdir build && cd build
-cmake -DTEASERPP_PYTHON_VERSION=<version> .. && make teaserpp_python
+cmake -DTEASERPP_PYTHON_VERSION=3.8 .. && make teaserpp_python
 cd python && pip install .
-cd ../.. && cd examples/teaser_python_ply 
-python teaser_python_ply.py
 ```
-Make sure to replace \<version\> with the python version in fpfh.
+This installs teaserpp_python.
 
 Run evaluations:
 ```bash
 cd fpfh_teaser
-conda activate fpfh
+conda activate pb-fpfh
 bash scripts/test.sh
 ```
 note: uncomment out "from pytorch3d import ops" in pose-baselines/utils_common.py
