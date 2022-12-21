@@ -10,7 +10,7 @@ from shapenet import ShapeNet
 from ycb import YCB
 from utils_common import display_two_pcs
 from utils_common import adds_error, rotation_error, translation_error
-from utils_common import EvalData
+from utils_eval import EvalData
 
 
 def evaluate(dataset_name, object, visualize=False, args=None):

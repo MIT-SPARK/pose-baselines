@@ -21,8 +21,9 @@ from utils_conversion import deepgmrDataToStandardFormat, ShapeNetDataset, YCBDa
 
 import sys
 sys.path.append("../")
-from utils_common import analyze_registration_dataset, plot_cdf, EvalData
+from utils_common import analyze_registration_dataset, plot_cdf
 from utils_common import rotation_error, translation_error, adds_error
+from utils_eval import EvalData
 
 
 def evaluate(model, loader, rmse_thresh, save_results=False, results_dir=None, writer=None):

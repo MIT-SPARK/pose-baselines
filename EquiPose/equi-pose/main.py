@@ -26,7 +26,7 @@ import sys
 sys.path.append("../../")
 from utils_common import display_two_pcs, pos_tensor_to_o3d
 from utils_common import translation_error, rotation_error, adds_error
-from utils_common import EvalData
+from utils_eval import EvalData
 from utils_common import analyze_registration_dataset, plot_cdf
 from utils_conversion import correctEquiPoseGT, equiposeDataToStandardForm, removeTranslationShapenet
 from utils_conversion import ChamferDistanceSqrt

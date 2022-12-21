@@ -4,9 +4,20 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import ipywidgets as widgets
 
-from utils_common import EvalData
-from shapenet import OBJECT_CATEGORIES as shapenet_objects
-from ycb import OBJECT_CATEGORIES as ycb_objects
+from utils_eval import EvalData
+
+# from shapenet import OBJECT_CATEGORIES as shapenet_objects
+shapenet_objects = ['airplane', 'bathtub', 'bed', 'bottle',
+                    'cap', 'car', 'chair', 'guitar',
+                    'helmet', 'knife', 'laptop', 'motorcycle',
+                    'mug', 'skateboard', 'table', 'vessel']
+
+# from ycb import OBJECT_CATEGORIES as ycb_objects
+ycb_objects = ["001_chips_can", "002_master_chef_can", "003_cracker_box", "004_sugar_box",
+               "005_tomato_soup_can", "006_mustard_bottle", "007_tuna_fish_can", "008_pudding_box",
+               "009_gelatin_box", "010_potted_meat_can", "011_banana", "019_pitcher_base",
+               "021_bleach_cleanser", "035_power_drill", "036_wood_block", "037_scissors",
+               "040_large_marker", "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
 
 
 shapenet_datasets =["shapenet.sim.easy", "shapenet.sim.hard", "shapenet.real.hard"]

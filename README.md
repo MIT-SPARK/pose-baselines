@@ -16,6 +16,7 @@ pip install pandas
 pip install seaborn
 pip install notebook
 pip install ipywidgets
+pip install pickle5
 ```
 
 Make sure you are in the room directory (i.e. pose-baselines/). Run jupyter notebook:

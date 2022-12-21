@@ -13,7 +13,7 @@ import utils
 
 import sys
 sys.path.append("../")
-from utils_common import EvalData
+from utils_eval import EvalData
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.addHandler(logging.NullHandler())
