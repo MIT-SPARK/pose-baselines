@@ -14,6 +14,12 @@ We would like to thank the Authors of these repos, as we use their implementatio
 
 ## Visualizing the Results 
 
+Clone the repository:
+```bash
+git clone --depth 1 https://github.com/MIT-SPARK/pose-baselines.git
+cd pose-baselines/
+```
+
 Install conda environment:
 ```bash
 conda create --name pb-viz python=3.9
@@ -30,9 +36,9 @@ pip install pickle5
 Make sure you are in the room directory (i.e. pose-baselines/). Run jupyter notebook:
 ```bash
 conda activate pb-viz
-jupyter notebook
+jupyter notebook results.ipynb
 ```
-Open results.ipynb and run. You should see the following:
+You should see the following:
 
 ![preview](docs/pd-results.gif) 
 
