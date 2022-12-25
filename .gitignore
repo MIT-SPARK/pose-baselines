@@ -131,3 +131,6 @@ dmypy.json
 # Pycharm
 .idea/
 /extra/
+/results/real_hard.png
+/results/sim_easy.png
+/results/sim_hard.png

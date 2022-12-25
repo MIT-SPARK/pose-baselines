@@ -4,6 +4,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import ipywidgets as widgets
 
+import sys
+sys.path.append("../")
 from utils_eval import EvalData
 
 # from shapenet import OBJECT_CATEGORIES as shapenet_objects
@@ -25,34 +27,35 @@ ycb_datasets = ["ycb.sim", "ycb.real"]
 
 datasets = shapenet_datasets + ycb_datasets
 
-baselines_default = ["KeyPoSim",
-                     "KeyPoSimICP",
-                     #"KeyPoSimRANSACICP",
-                     "KeyPoSimCor",
-                     "KeyPoSimCorICP",
-                     #"KeyPoSimCorRANSACICP",
-                     "c3po",
-                     "KeyPoReal"]
+# baselines_default = ["KeyPoSim",
+#                      "KeyPoSimICP",
+#                      #"KeyPoSimRANSACICP",
+#                      "KeyPoSimCor",
+#                      "KeyPoSimCorICP",
+#                      #"KeyPoSimCorRANSACICP",
+#                      "c3po",
+#                      "KeyPoReal"]
+baselines_default = ['KeyPoSim', 'KeyPoReal']
 baselines_new = ["deepgmr",
                  "equipose",
                  "fpfh",
                  "pointnetlk"]
 baselines = baselines_new + baselines_default
 
-baseline_folders = {"deepgmr": "deepgmr/runs",
-                    "equipose": "EquiPose/equi-pose/runs",
-                    "fpfh": "fpfh_teaser/runs",
-                    "pointnetlk": "PointNetLK_Revisited/runs"}
+baseline_folders = {"deepgmr": "../deepgmr/runs",
+                    "equipose": "../EquiPose/equi-pose/runs",
+                    "fpfh": "../fpfh_teaser/runs",
+                    "pointnetlk": "../PointNetLK_Revisited/runs"}
 
 baseline_display_name = {
-             "KeyPoSim": "KeyPo (sim)",
-             "KeyPoSimICP": "KeyPo (sim) + ICP",
-             "KeyPoSimRANSACICP": "KeyPo (sim) + RANSAC + ICP",
-             "KeyPoSimCor": "KeyPo (sim) + Corr.",
-             "KeyPoSimCorICP": "KeyPo (sim) + Corr. + ICP",
-             "KeyPoSimCorRANSACICP": "KeyPo (sim) + Corr. + RANSAC + ICP",
+             "KeyPoSim": "KeyPo",
+             # "KeyPoSimICP": "KeyPo (sim) + ICP",
+             # "KeyPoSimRANSACICP": "KeyPo (sim) + RANSAC + ICP",
+             # "KeyPoSimCor": "KeyPo (sim) + Corr.",
+             # "KeyPoSimCorICP": "KeyPo (sim) + Corr. + ICP",
+             # "KeyPoSimCorRANSACICP": "KeyPo (sim) + Corr. + RANSAC + ICP",
              "c3po": "C-3PO",
-             "KeyPoReal": "KeyPo (real)",
+             "KeyPoReal": "KeyPo",
              "deepgmr": "DeepGMR",
              "equipose": "EquiPose",
              "fpfh": "FPFH + TEASER++",
@@ -137,7 +140,7 @@ def table(my_dataset, my_object, my_adds_th, my_adds_auc_th):
     #
     if "shapenet" in my_dataset:
         # my_dataset = "shapenet.real.hard"
-        base_folder = "c3po/expt_shapenet"
+        base_folder = "../c3po/expt_shapenet"
 
         if my_object not in shapenet_objects:
             print("Error: Specified Object not in the Dataset.")
@@ -145,7 +148,7 @@ def table(my_dataset, my_object, my_adds_th, my_adds_auc_th):
 
     elif "ycb" in my_dataset:
         # my_dataset = "ycb.real"
-        base_folder = "c3po/expt_ycb"
+        base_folder = "../c3po/expt_ycb"
 
         if my_object not in ycb_objects:
             print("Error: Specified Object not in the Dataset.")
@@ -193,7 +196,7 @@ def plot(my_dataset, my_object, my_metric):
     #
     if "shapenet" in my_dataset:
         # my_dataset = "shapenet.real.hard"
-        base_folder = "c3po/expt_shapenet"
+        base_folder = "../c3po/expt_shapenet"
 
         if my_object not in shapenet_objects:
             print("Error: Specified Object not in the Dataset.")
@@ -201,7 +204,7 @@ def plot(my_dataset, my_object, my_metric):
 
     elif "ycb" in my_dataset:
         # my_dataset = "ycb.real"
-        base_folder = "c3po/expt_ycb"
+        base_folder = "../c3po/expt_ycb"
 
         if my_object not in ycb_objects:
             print("Error: Specified Object not in the Dataset.")
@@ -237,15 +240,15 @@ def plot(my_dataset, my_object, my_metric):
     data = extract_data(my_files, my_baselines)
 
     if my_metric == "adds":
-        plot_adds(data)
+        sns_plot = plot_adds(data)
     elif my_metric == "rerr":
-        plot_rerr(data)
+        sns_plot = plot_rerr(data)
     elif my_metric == "terr":
-        plot_terr(data)
+        sns_plot = plot_terr(data)
     else:
         raise ValueError("my_metric not correctly specified.")
 
-    return None
+    return sns_plot
 
 
 def table_certifiable(my_dataset, my_object):
@@ -255,7 +258,7 @@ def table_certifiable(my_dataset, my_object):
     #
     if "shapenet" in my_dataset:
         # if my_dataset == "shapenet":
-        base_folder = "c3po/expt_shapenet"
+        base_folder = "../c3po/expt_shapenet"
 
         if my_object not in shapenet_objects:
             print("Error: Specified Object not in the Dataset.")
@@ -263,7 +266,7 @@ def table_certifiable(my_dataset, my_object):
 
     elif "ycb" in my_dataset:
         # elif my_dataset == "ycb":
-        base_folder = "c3po/expt_ycb"
+        base_folder = "../c3po/expt_ycb"
 
         if my_object not in ycb_objects:
             print("Error: Specified Object not in the Dataset.")
@@ -329,7 +332,8 @@ def table_certifiable(my_dataset, my_object):
 
 def plot_adds(data):
 
-    sns.set(style="darkgrid")
+    # sns.set(style="darkgrid")
+    sns.set_style("whitegrid")
     adds_data = dict()
     for key in data.keys():
         df_ = pd.DataFrame(dict({key: data[key]["adds"]}))
@@ -337,15 +341,16 @@ def plot_adds(data):
 
     conca = pd.concat([adds_data[key].assign(dataset=key) for key in adds_data.keys()])
 
-    sns.kdeplot(conca, bw_adjust=0.1, cumulative=True, common_norm=False)
+    sns_plot = sns.kdeplot(conca, bw_adjust=0.1, cumulative=True, common_norm=False)
     plt.xlabel('ADD-S')
 
-    return None
+    return sns_plot
 
 
 def plot_rerr(data):
 
-    sns.set(style="darkgrid")
+    sns.set_style("whitegrid")
+    # sns.set(style="darkgrid")
     rerr_data = dict()
     for key in data.keys():
         df_ = pd.DataFrame(dict({key: data[key]["rerr"]}))
@@ -353,15 +358,16 @@ def plot_rerr(data):
 
     conca = pd.concat([rerr_data[key].assign(dataset=key) for key in rerr_data.keys()])
 
-    sns.kdeplot(conca, bw_adjust=0.1, cumulative=True, common_norm=False)
+    sns_plot = sns.kdeplot(conca, bw_adjust=0.1, cumulative=True, common_norm=False)
     plt.xlabel('Rotation Error (axis-angle, in rad)')
 
-    return None
+    return sns_plot
 
 
 def plot_terr(data):
 
-    sns.set(style="darkgrid")
+    sns.set_style("whitegrid")
+    # sns.set(style="darkgrid")
     terr_data = dict()
     for key in data.keys():
         df_ = pd.DataFrame(dict({key: data[key]["terr"]}))
@@ -369,10 +375,10 @@ def plot_terr(data):
 
     conca = pd.concat([terr_data[key].assign(dataset=key) for key in terr_data.keys()])
 
-    sns.kdeplot(conca, bw_adjust=0.1, cumulative=True, common_norm=False)
+    sns_plot = sns.kdeplot(conca, bw_adjust=0.1, cumulative=True, common_norm=False)
     plt.xlabel('Translation Error')
 
-    return None
+    return sns_plot
 
 
 
