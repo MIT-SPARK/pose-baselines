@@ -1,4 +1,5 @@
 import os
+import csv
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -29,10 +30,10 @@ datasets = shapenet_datasets + ycb_datasets
 
 baselines_default = ["KeyPoSim",
                      "KeyPoSimICP",
-                     #"KeyPoSimRANSACICP",
+                     "KeyPoSimRANSACICP",
                      "KeyPoSimCor",
                      "KeyPoSimCorICP",
-                     #"KeyPoSimCorRANSACICP",
+                     "KeyPoSimCorRANSACICP",
                      "c3po",
                      "KeyPoReal"]
 baselines_new = ["deepgmr",
@@ -122,8 +123,8 @@ def extract_data(my_files, my_labels, my_adds_th=0.05, my_adds_auc_th=0.10):
 
             eval_data_oc = eval_data.compute_oc()
             eval_data_oc_nd = eval_data.compute_ocnd()
-            label_oc = label + " (oc)"
-            label_oc_nd = label + " (oc+nd)"
+            label_oc = label + " (oc=1)"
+            label_oc_nd = label + " (oc=1, nd=1)"
 
             data[label_oc] = eval_data_oc.data
             data[label_oc_nd] = eval_data_oc_nd.data
@@ -134,7 +135,7 @@ def extract_data(my_files, my_labels, my_adds_th=0.05, my_adds_auc_th=0.10):
     return data
 
 
-def table(my_dataset, my_object, my_adds_th, my_adds_auc_th):
+def table(my_dataset, my_object, my_adds_th, my_adds_auc_th, show_table=True):
 
     #
     if "shapenet" in my_dataset:
@@ -185,9 +186,10 @@ def table(my_dataset, my_object, my_adds_th, my_adds_auc_th):
     #
     df = pd.DataFrame(data, index=["adds_th_score", "adds_auc"])
     df = df.transpose()
-    display(100 * df)
+    if show_table:
+        display(100 * df)
 
-    return None
+    return data
 
 
 def plot(my_dataset, my_object, my_metric):
@@ -377,8 +379,59 @@ def plot_terr(data):
     return None
 
 
+def save_full_table(experiment):
 
+    if experiment == "shapenet":
 
+        data = []
+        for object_ in shapenet_objects:
+
+            data_ = table("shapenet.real.hard", object_, 0.05, 0.10, False)
+
+            for key, dict_ in data_.items():
+
+                if key == "C-3PO (oc=1)":
+                    continue
+
+                ds_ = dict()
+                ds_['object'] = object_
+                ds_['baseline'] = key
+                ds_['ADD-S'] = 100 * dict_['adds_th_score']
+                ds_['ADD-S AUC'] = 100 * dict_['adds_auc']
+
+                data.append(ds_)
+
+        filename_ = "runs/shapenet_table_full.csv"
+
+    elif experiment == "ycb":
+
+        data = []
+        for object_ in ycb_objects:
+
+            data_ = table("ycb.real", object_, 0.05, 0.10, False)
+
+            for key, dict_ in data_.items():
+
+                if key == "C-3PO (oc=1)":
+                    continue
+
+                ds_ = dict()
+                ds_['object'] = object_
+                ds_['baseline'] = key
+                ds_['ADD-S'] = 100 * dict_['adds_th_score']
+                ds_['ADD-S AUC'] = 100 * dict_['adds_auc']
+
+                data.append(ds_)
+
+        filename_ = "runs/ycb_table_full.csv"
+
+    else:
+        raise ValueError("experiment not specified correctly.")
+
+    with open(filename_, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=data[0].keys())
+        writer.writeheader()
+        writer.writerows(data)
 
 
 
