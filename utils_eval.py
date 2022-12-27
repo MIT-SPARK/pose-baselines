@@ -114,10 +114,14 @@ class EvalData:
         idx = np.where(self.data["oc"] * self.data["nd"] == 1)
         self.data["adds_oc_nd"] = self.data["adds"][idx]
 
-        # fill adds_th_score, adds_oc_th_score, adds_oc_nd_th_score
-        self.data["adds_th_score"] = (self.data["adds"] <= self.data["adds_th"]).mean()
-        # fill adds_auc, adds_oc_auc, adds_oc_nd_auc
-        self.data["adds_auc"] = get_auc(self.data["adds"], self.data["adds_auc_th"])
+        if len(self.data["adds"]) == 0:
+            self.data["adds_th_score"] = np.asarray([0.0])[0]
+            self.data["adds_auc"] = np.asarray([0.0])[0]
+        else:
+            # fill adds_th_score, adds_oc_th_score, adds_oc_nd_th_score
+            self.data["adds_th_score"] = (self.data["adds"] <= self.data["adds_th"]).mean()
+            # fill adds_auc, adds_oc_auc, adds_oc_nd_auc
+            self.data["adds_auc"] = get_auc(self.data["adds"], self.data["adds_auc_th"])
 
         # oc
         if len(self.data["adds_oc"]) == 0:
