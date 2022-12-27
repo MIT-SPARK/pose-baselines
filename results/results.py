@@ -23,6 +23,29 @@ ycb_objects = ["001_chips_can", "002_master_chef_can", "003_cracker_box", "004_s
                "040_large_marker", "051_large_clamp", "052_extra_large_clamp", "061_foam_brick"]
 
 
+ycb_object_labels = {
+                    "001_chips_can": "chips can",
+                    "002_master_chef_can": "master chef can",
+                    "003_cracker_box": "cracker box",
+                    "004_sugar_box": "sugar box",
+                    "005_tomato_soup_can": "tomato soup can",
+                    "006_mustard_bottle": "mustard bottle",
+                    "007_tuna_fish_can": "tuna fish can",
+                    "008_pudding_box": "pudding box",
+                    "009_gelatin_box": "gelatin box",
+                    "010_potted_meat_can": "potted meat can",
+                    "011_banana": "banana",
+                    "019_pitcher_base": "pitcher base",
+                    "021_bleach_cleanser": "bleach cleanser",
+                    "035_power_drill": "power drill",
+                    "036_wood_block": "wood block",
+                    "037_scissors": "scissors",
+                    "040_large_marker": "large marker",
+                    "051_large_clamp": "large clamp",
+                    "052_extra_large_clamp": "extra large clamp",
+                    "061_foam_brick": "foam brick"
+}
+
 shapenet_datasets =["shapenet.sim.easy", "shapenet.sim.hard", "shapenet.real.hard"]
 ycb_datasets = ["ycb.sim", "ycb.real"]
 
@@ -434,6 +457,163 @@ def save_full_table(experiment):
         writer.writerows(data)
 
 
+def latex_table(experiment, baselines, objects, filename=None):
+
+    # extract data
+    if experiment == "shapenet":
+
+        data = dict()
+        data_cert = dict()
+        baselines_cert = ["KeyPo (sim)", "KeyPo (sim) + Corr.", "C-3PO"]
+        for object_ in objects:
+
+            data_ = table("shapenet.real.hard", object_, 0.05, 0.10, False)
+            data[object_] = dict()
+            data_cert[object_] = dict()
+            for key, dict_ in data_.items():
+
+                if key == "C-3PO (oc=1)" or key not in baselines:
+                    continue
+
+                ds_ = dict()
+                # ds_['object'] = object_
+                data[object_][key] = {'ADD-S': 100 * dict_['adds_th_score'], 'ADD-S AUC': 100 * dict_['adds_auc']}
+                # ds_['ADD-S'] = 100 * dict_['adds_th_score']
+                # ds_['ADD-S AUC'] = 100 * dict_['adds_auc']
+
+                # data[object_].append(ds_)
+
+            for b_ in baselines_cert:
+                oc = data_[b_]["oc"]
+                nd = data_[b_]["nd"]
+                data_cert[object_][b_] = 100 * (oc * nd).sum()/len(oc)
+
+        if filename is None:
+            filename_ = "runs/shapenet_table_full.tex"
+        else:
+            filename_ = "runs/" + str(filename)
+
+    elif experiment == "ycb":
+
+        data = dict()
+        data_cert = dict()
+        baselines_cert = ["KeyPo (sim)", "KeyPo (sim) + Corr.", "C-3PO"]
+        for object_ in objects:
+
+            data_ = table("ycb.real", object_, 0.05, 0.10, False)
+            data[ycb_object_labels[object_]] = dict()
+            data_cert[ycb_object_labels[object_]] = dict()
+            for key, dict_ in data_.items():
+
+                if key == "C-3PO (oc=1)" or key not in baselines:
+                    continue
+
+                # ds_ = dict()
+                # ds_['object'] = object_
+                # ds_['baseline'] = key
+                data[ycb_object_labels[object_]][key] = {'ADD-S': 100 * dict_['adds_th_score'], 'ADD-S AUC': 100 * dict_['adds_auc']}
+                # ds_['ADD-S'] = 100 * dict_['adds_th_score']
+                # ds_['ADD-S AUC'] = 100 * dict_['adds_auc']
+
+                # data[object_].append(ds_)
+
+            for b_ in baselines_cert:
+                oc = data_[b_]["oc"]
+                nd = data_[b_]["nd"]
+                data_cert[ycb_object_labels[object_]][b_] = 100 * (oc * nd).sum()/len(oc)
+
+        if filename is None:
+            filename_ = "runs/ycb_table_full.tex"
+        else:
+            filename_ = "runs/" + filename
+
+    else:
+        raise ValueError("experiment not specified correctly.")
+
+    # creating and saving the latex table
+    lines = []
+
+    line_ = "\\begin{tabular}{|l|"
+    for o_ in objects:
+        line_ += "rr|"
+    line_ += "}"
+    lines.append(line_)
+
+    line_ = "\\toprule"
+    lines.append(line_)
+
+    line_ = "ADD-S~~~~ADD-S (AUC)"
+    for idx, o_ in enumerate(data.keys()):
+        if idx == len(data.keys()) - 1:
+            line_ += f" &\multicolumn{{2}}{{c|}}{{{o_}}} "
+        else:
+            line_ += f" &\multicolumn{{2}}{{c}}{{{o_}}} "
+    line_ += " \\\\"
+    lines.append(line_)
+
+    line_ = "\\midrule"
+    lines.append(line_)
+
+    for b_ in baselines:
+        line_ = b_
+        for o_ in objects:
+
+            if "ycb" in experiment:
+                o_ = ycb_object_labels[o_]
+
+            if b_ not in data[o_].keys():
+                line_ += f" & -- &  -- "
+            else:
+                adds = data[o_][b_]["ADD-S"]
+                auc = data[o_][b_]["ADD-S AUC"]
+                line_ += f" & ${adds:.2f}$ & ${auc:.2f}$ "
+        line_ += "   \\\\"
+        lines.append(line_)
+
+    line_ = "\midrule"
+
+    lines.append(line_)
+
+    line_ = "$\\%$ (\\ocx=1, \\ndx=1)  "
+
+    for idx, o_ in enumerate(data.keys()):
+        if idx == len(data.keys()) - 1:
+            line_ += f" &\multicolumn{{2}}{{c|}}{{{o_}}}"
+        else:
+            line_ += f" &\multicolumn{{2}}{{c}}{{{o_}}}"
+
+    line_ += " \\\\"
+    lines.append(line_)
+
+    line_ = "\\midrule"
+    lines.append(line_)
+
+    baselines_cert = data_cert[list(data_cert.keys())[0]].keys()
+    for b_ in baselines_cert:
+        line_ = b_
+        for o_ in objects:
+
+            if "ycb" in experiment:
+                o_ = ycb_object_labels[o_]
+            # data
+            percent = data_cert[o_][b_]
+            line_ += f" & \multicolumn{{2}}{{c|}}{{{percent:.2f}}}  "
+        line_ += "   \\\\"
+        lines.append(line_)
+
+    line_ = "\\bottomrule"
+
+    lines.append(line_)
+
+    line_ = "\\end{tabular}"
+
+    lines.append(line_)
+
+    # saving
+    with open(filename_, "w") as f:
+        f.write('\n'.join(lines))
+
+    return data, data_cert
 
 
 
