@@ -500,7 +500,7 @@ def latex_table(experiment, baselines, objects, filename=None):
         baselines_cert = ["KeyPo (sim)", "KeyPo (sim) + Corr.", "C-3PO"]
         for object_ in objects:
 
-            data_ = table("ycb.real", object_, 0.05, 0.10, False)
+            data_ = table("ycb.real", object_, 0.02, 0.05, False)
             data[ycb_object_labels[object_]] = dict()
             data_cert[ycb_object_labels[object_]] = dict()
             for key, dict_ in data_.items():
@@ -616,8 +616,96 @@ def latex_table(experiment, baselines, objects, filename=None):
     return data, data_cert
 
 
+def latex_table_cert(filename=None):
+
+    nd_shapenet_objects =["cap", "mug"]
+    nd_ycb_objects = ["003_cracker_box", "004_sugar_box",
+                      "008_pudding_box", "009_gelatin_box", "010_potted_meat_can",
+                      "035_power_drill", "036_wood_block", "061_foam_brick"]
+
+    if filename is None:
+        filename_ = "runs/table_cert.tex"
+    else:
+        filename_ = "runs/" + str(filename)
+
+    data = dict()
+    for object_ in nd_shapenet_objects + nd_ycb_objects:
+
+        if object_ in nd_shapenet_objects:
+            data_ = table("shapenet.real.hard", object_, 0.05, 0.10, False)
+        elif object_ in nd_ycb_objects:
+            data_ = table("ycb.real", object_, 0.02, 0.05, False)
+        else:
+            raise ValueError("object_ incorrect.")
+
+        data[object_] = dict()
+
+        data[object_]['C-3PO'] = {'ADD-S': 100 * data_['C-3PO']['adds_th_score'],
+                                  'ADD-S AUC': 100 * data_['C-3PO']['adds_auc'],
+                                  'percent': 100}
+
+        oc = data_['C-3PO']["oc"]
+        nd = data_['C-3PO']["nd"]
+        percent_oc = 100 * oc.sum() / len(oc)
+        percent_ocnd = 100 * (oc * nd).sum()/len(oc)
+
+        for key, dict_ in data_.items():
+
+            if "C-3PO" not in key:
+                continue
+
+            if key == "C-3PO":
+                continue
+
+            if "oc=1" in key:
+                if "nd=1" in key:
+                    data[object_][key] = {'ADD-S': 100 * dict_['adds_th_score'],
+                                          'ADD-S AUC': 100 * dict_['adds_auc'],
+                                          'percent': percent_ocnd}
+                else:
+                    data[object_][key] = {'ADD-S': 100 * dict_['adds_th_score'],
+                                          'ADD-S AUC': 100 * dict_['adds_auc'],
+                                          'percent': percent_oc}
 
 
+    # # creating and saving the latex table
+    lines = []
+    lines.append("\\begin{tabular}{l|l|rr|r|}")
+    lines.append("\\toprule")
+    lines.append("object & C-3PO & ADD-S & ADD-S AUC & percent \\\\")
+    lines.append("\\midrule")
+
+    for idx, obj_ in enumerate(data.keys()):
+        adds = data[obj_]['C-3PO']['ADD-S']
+        auc = data[obj_]['C-3PO']['ADD-S AUC']
+        p = data[obj_]['C-3PO']['percent']
+        adds_oc = data[obj_]['C-3PO (oc=1)']['ADD-S']
+        auc_oc = data[obj_]['C-3PO (oc=1)']['ADD-S AUC']
+        p_oc = data[obj_]['C-3PO (oc=1)']['percent']
+        adds_ocnd = data[obj_]['C-3PO (oc=1, nd=1)']['ADD-S']
+        auc_ocnd = data[obj_]['C-3PO (oc=1, nd=1)']['ADD-S AUC']
+        p_ocnd = data[obj_]['C-3PO (oc=1, nd=1)']['percent']
+
+        if obj_ in nd_shapenet_objects:
+            lines.append(f"\\multirow{{3}}{{*}}{{{obj_}}} & all & {adds:.2f} & {auc:.2f} & {p:.2f} \\\\")
+        elif obj_ in nd_ycb_objects:
+            lines.append(f"\\multirow{{3}}{{*}}{{{ycb_object_labels[obj_]}}} & all & {adds:.2f} & {auc:.2f} & {p:.2f} \\\\")
+
+        lines.append(f"& \ocx=1 & {adds_oc:.2f} & {auc_oc:.2f} & {p_oc:.2f} \\\\")
+        lines.append(f"& \ocx, \\ndx=1 & {adds_ocnd:.2f} & {auc_ocnd:.2f} & {p_ocnd:.2f} \\\\")
+
+        if idx == len(data.keys()) - 1:
+            lines.append("\\bottomrule")
+        else:
+            lines.append("\\midrule")
+
+    lines.append("\\end{tabular}")
+
+    # saving
+    with open(filename_, "w") as f:
+        f.write('\n'.join(lines))
+
+    return data
 
 
 
