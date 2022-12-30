@@ -63,7 +63,7 @@ baselines_new = ["deepgmr",
                  "equipose",
                  "fpfh",
                  "pointnetlk"]
-baselines = baselines_new + baselines_default
+# baselines = baselines_new + baselines_default
 
 baseline_folders = {"deepgmr": "../deepgmr/runs",
                     "equipose": "../EquiPose/equi-pose/runs",
@@ -123,7 +123,7 @@ slide_adds_auc_th = widgets.FloatSlider(
 )
 
 
-def extract_data(my_files, my_labels, my_adds_th=0.05, my_adds_auc_th=0.10):
+def extract_data(my_files, my_labels, my_adds_th=0.05, my_adds_auc_th=0.10, short=False):
 
     labels = []
     data = dict()
@@ -142,7 +142,7 @@ def extract_data(my_files, my_labels, my_adds_th=0.05, my_adds_auc_th=0.10):
         data[label] = eval_data.data
         labels.append(label)
 
-        if label == baseline_display_name["c3po"]:
+        if label == baseline_display_name["c3po"] and not short:
 
             eval_data_oc = eval_data.compute_oc()
             eval_data_oc_nd = eval_data.compute_ocnd()
@@ -158,7 +158,19 @@ def extract_data(my_files, my_labels, my_adds_th=0.05, my_adds_auc_th=0.10):
     return data
 
 
-def table(my_dataset, my_object, my_adds_th, my_adds_auc_th, show_table=True):
+def table(my_dataset, my_object, my_adds_th, my_adds_auc_th, show_table=True, short=False):
+
+    if short:
+        baselines = ["KeyPoSim",
+                     "KeyPoSimCor",
+                     "c3po",
+                     "KeyPoReal",
+                     "deepgmr",
+                     "equipose",
+                     "fpfh",
+                     "pointnetlk"]
+    else:
+        baselines = baselines_default + baselines_new
 
     #
     if "shapenet" in my_dataset:
@@ -204,7 +216,7 @@ def table(my_dataset, my_object, my_adds_th, my_adds_auc_th, show_table=True):
         #     print(_filename)
 
     #
-    data = extract_data(my_files, my_baselines, my_adds_th, my_adds_auc_th)
+    data = extract_data(my_files, my_baselines, my_adds_th, my_adds_auc_th, short=short)
 
     #
     df = pd.DataFrame(data, index=["adds_th_score", "adds_auc"])
@@ -215,8 +227,19 @@ def table(my_dataset, my_object, my_adds_th, my_adds_auc_th, show_table=True):
     return data
 
 
-def plot(my_dataset, my_object, my_metric):
+def plot(my_dataset, my_object, my_metric, short=False):
 
+    if short:
+        baselines = ["KeyPoSim",
+                     "KeyPoSimCor",
+                     "c3po",
+                     "KeyPoReal",
+                     "deepgmr",
+                     "equipose",
+                     "fpfh",
+                     "pointnetlk"]
+    else:
+        baselines = baselines_default + baselines_new
     #
     if "shapenet" in my_dataset:
         # my_dataset = "shapenet.real.hard"
@@ -261,18 +284,18 @@ def plot(my_dataset, my_object, my_metric):
         #     print(_filename)
 
     #
-    data = extract_data(my_files, my_baselines)
+    data = extract_data(my_files, my_baselines, short=short)
 
     if my_metric == "adds":
-        plot_adds(data)
+        sns_plot = plot_adds(data)
     elif my_metric == "rerr":
-        plot_rerr(data)
+        sns_plot = plot_rerr(data)
     elif my_metric == "terr":
-        plot_terr(data)
+        sns_plot = plot_terr(data)
     else:
         raise ValueError("my_metric not correctly specified.")
 
-    return None
+    return sns_plot
 
 
 def table_certifiable(my_dataset, my_object):
@@ -356,7 +379,7 @@ def table_certifiable(my_dataset, my_object):
 
 def plot_adds(data):
 
-    sns.set(style="darkgrid")
+    sns.set(style="whitegrid")
     adds_data = dict()
     for key in data.keys():
         df_ = pd.DataFrame(dict({key: data[key]["adds"]}))
@@ -364,15 +387,15 @@ def plot_adds(data):
 
     conca = pd.concat([adds_data[key].assign(dataset=key) for key in adds_data.keys()])
 
-    sns.kdeplot(conca, bw_adjust=0.1, cumulative=True, common_norm=False)
+    sns_plot = sns.kdeplot(conca, bw_adjust=0.1, cumulative=True, common_norm=False)
     plt.xlabel('ADD-S')
 
-    return None
+    return sns_plot
 
 
 def plot_rerr(data):
 
-    sns.set(style="darkgrid")
+    sns.set(style="whitegrid")
     rerr_data = dict()
     for key in data.keys():
         df_ = pd.DataFrame(dict({key: data[key]["rerr"]}))
@@ -380,15 +403,15 @@ def plot_rerr(data):
 
     conca = pd.concat([rerr_data[key].assign(dataset=key) for key in rerr_data.keys()])
 
-    sns.kdeplot(conca, bw_adjust=0.1, cumulative=True, common_norm=False)
+    sns_plot = sns.kdeplot(conca, bw_adjust=0.1, cumulative=True, common_norm=False)
     plt.xlabel('Rotation Error (axis-angle, in rad)')
 
-    return None
+    return sns_plot
 
 
 def plot_terr(data):
 
-    sns.set(style="darkgrid")
+    sns.set(style="whitegrid")
     terr_data = dict()
     for key in data.keys():
         df_ = pd.DataFrame(dict({key: data[key]["terr"]}))
@@ -396,10 +419,10 @@ def plot_terr(data):
 
     conca = pd.concat([terr_data[key].assign(dataset=key) for key in terr_data.keys()])
 
-    sns.kdeplot(conca, bw_adjust=0.1, cumulative=True, common_norm=False)
+    sns_plot = sns.kdeplot(conca, bw_adjust=0.1, cumulative=True, common_norm=False)
     plt.xlabel('Translation Error')
 
-    return None
+    return sns_plot
 
 
 def save_full_table(experiment):
