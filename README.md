@@ -194,16 +194,16 @@ note: either comment out "from pytorch3d import ops" in pose-baselines/utils_com
 If you find this project useful, do cite our work:
 
 ```bibtex
-@article{Talak22arxiv-correctAndCertify,
-  title = {Correct and {{Certify}}: {{A New Approach}} to {{Self-Supervised 3D-Object Perception}}},
+@article{Talak23arxiv-c3po,
+  title = {Certifiable 3D Object Pose Estimation: Foundations, Learning Models, and Self-Training},
   author = {Talak, Rajat and Peng, Lisa and Carlone, Luca},
-  year = {2022},
-  month = {Jun.},
+  year = {2023},
+  month = {Jan.},
   journal = {arXiv preprint arXiv: 2206.11215},
   eprint = {2206.11215},
   note = {\linkToPdf{https://arxiv.org/pdf/2206.11215.pdf}},
   pdf={https://arxiv.org/pdf/2206.11215.pdf},
-  Year = {2022}
+  Year = {2023}
 }
 
 ```
