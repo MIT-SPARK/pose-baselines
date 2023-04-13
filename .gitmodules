@@ -1,0 +1,3 @@
+[submodule "deepgmr"]
+	path = deepgmr
+	url = git@github.com:MIT-SPARK/deepgmr.git

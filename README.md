@@ -24,6 +24,7 @@ Install conda environment:
 ```bash
 conda create --name pb-viz python=3.9
 conda activate pb-viz
+conda install scipy
 conda install pip 
 pip install numpy
 pip install pandas
@@ -33,7 +34,7 @@ pip install ipywidgets
 pip install pickle5
 ```
 
-Make sure you are in the room directory (i.e. pose-baselines/). Run jupyter notebook:
+Make sure you are in the results directory (i.e. pose-baselines/results). Run jupyter notebook:
 ```bash
 conda activate pb-viz
 jupyter notebook results.ipynb
