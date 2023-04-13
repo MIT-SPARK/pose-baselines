@@ -1,6 +1,0 @@
-MODEL:
-  num_channels_R: 1
-  num_in_channels: 3
-  
-model:
-  input_num: 1024
