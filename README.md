@@ -16,7 +16,7 @@ We would like to thank the Authors of these repos, as we use their implementatio
 
 Clone the repository:
 ```bash
-git clone --depth 1 https://github.com/MIT-SPARK/pose-baselines.git
+git clone --recurse-submodules --depth 1 https://github.com/MIT-SPARK/pose-baselines.git
 cd pose-baselines/
 ```
 
