@@ -4,3 +4,6 @@
 [submodule "PointNetLK_Revisited"]
 	path = PointNetLK_Revisited
 	url = git@github.com:MIT-SPARK/PointNetLK_Revisited.git
+[submodule "EquiPose/equi-pose"]
+	path = EquiPose/equi-pose
+	url = git@github.com:MIT-SPARK/equi-pose.git
